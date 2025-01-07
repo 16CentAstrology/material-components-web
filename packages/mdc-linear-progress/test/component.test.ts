@@ -25,6 +25,7 @@
 import {animationDimensionPercentages as percentages} from '../../mdc-linear-progress/constants';
 import {MDCLinearProgress, MDCLinearProgressFoundation} from '../../mdc-linear-progress/index';
 import {MDCResizeObserver, MDCResizeObserverCallback, MDCResizeObserverEntry, WithMDCResizeObserver} from '../../mdc-linear-progress/types';
+import {createFixture, html} from '../../../testing/dom';
 import {emitEvent} from '../../../testing/dom/events';
 import {createMockFoundation} from '../../../testing/helpers/foundation';
 import {setUpMdcTestEnvironment} from '../../../testing/helpers/setup';
@@ -35,14 +36,13 @@ interface WithObserverFoundation {
 
 const RO = (window as unknown as WithMDCResizeObserver).ResizeObserver;
 
-const roundPixelsToTwoDecimals = (val: string) => {
+function roundPixelsToTwoDecimals(val: string) {
   const numberVal = Number(val.split('px')[0]);
   return Math.floor(numberVal * 100) / 100;
-};
+}
 
 function getFixture() {
-  const wrapper = document.createElement('div');
-  wrapper.innerHTML = `
+  return createFixture(html`
     <div role="progressbar" class="mdc-linear-progress" aria-label="Unit Test Progress Bar" aria-valuemin="0"
       aria-valuemax="1" aria-valuenow="0" style="width: 100px">
       <div class="mdc-linear-progress__buffer">
@@ -56,10 +56,7 @@ function getFixture() {
         <span class="mdc-linear-progress__bar-inner"></span>
       </div>
     </div>
-  `;
-  const el = wrapper.firstElementChild as HTMLElement;
-  wrapper.removeChild(el);
-  return el;
+  `);
 }
 
 const originalResizeObserver = RO;
@@ -91,8 +88,7 @@ describe('MDCLinearProgress', () => {
     const {root, component} = setupTest();
 
     component.determinate = false;
-    expect(root.classList.contains('mdc-linear-progress--indeterminate'))
-        .toBeTruthy();
+    expect(root).toHaveClass('mdc-linear-progress--indeterminate');
     expect(root.getAttribute(MDCLinearProgressFoundation.strings.ARIA_VALUENOW))
         .toEqual(null);
     expect(root.getAttribute(MDCLinearProgressFoundation.strings.ARIA_VALUEMAX))
@@ -105,10 +101,8 @@ describe('MDCLinearProgress', () => {
     const {root, component} = setupTest();
 
     component.progress = 0.5;
-    const primaryBar =
-        root.querySelector(
-            MDCLinearProgressFoundation.strings.PRIMARY_BAR_SELECTOR) as
-        HTMLElement;
+    const primaryBar = root.querySelector<HTMLElement>(
+        MDCLinearProgressFoundation.strings.PRIMARY_BAR_SELECTOR)!;
     // External GitHub TS compiler insists that `buffer.style.transform` could
     // be null
     // tslint:disable-next-line:no-unnecessary-type-assertion
@@ -121,10 +115,8 @@ describe('MDCLinearProgress', () => {
     const {root, component} = setupTest();
 
     component.buffer = 0.5;
-    const buffer =
-        root.querySelector(
-            MDCLinearProgressFoundation.strings.BUFFER_BAR_SELECTOR) as
-        HTMLElement;
+    const buffer = root.querySelector<HTMLElement>(
+        MDCLinearProgressFoundation.strings.BUFFER_BAR_SELECTOR)!;
     // External GitHub TS compiler insists that `buffer.style.transform` could
     // be null
     // tslint:disable-next-line:no-unnecessary-type-assertion
@@ -135,15 +127,13 @@ describe('MDCLinearProgress', () => {
     const {root, component} = setupTest();
 
     component.close();
-    expect(root.classList.contains('mdc-linear-progress--closed')).toBeTrue();
+    expect(root).toHaveClass('mdc-linear-progress--closed');
     emitEvent(root, 'transitionend');
-    expect(root.classList.contains('mdc-linear-progress--closed-animation-off'))
-        .toBeTrue();
+    expect(root).toHaveClass('mdc-linear-progress--closed-animation-off');
 
     component.open();
-    expect(root.classList.contains('mdc-linear-progress--closed')).toBeFalse();
-    expect(root.classList.contains('mdc-linear-progress--closed-animation-off'))
-        .toBeFalse();
+    expect(root).not.toHaveClass('mdc-linear-progress--closed');
+    expect(root).not.toHaveClass('mdc-linear-progress--closed-animation-off');
   });
 
   describe('attach to dom', () => {

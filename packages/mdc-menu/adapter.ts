@@ -43,7 +43,8 @@ export interface MDCMenuAdapter {
   /**
    * Adds an attribute, with value, to the element at the index provided.
    */
-  addAttributeToElementAtIndex(index: number, attr: string, value: string): void;
+  addAttributeToElementAtIndex(index: number, attr: string, value: string):
+      void;
 
   /**
    * Removes an attribute from an element at the index provided.
@@ -71,19 +72,20 @@ export interface MDCMenuAdapter {
   /**
    * @return Index of the element in the list or -1 if it is not in the list.
    */
-  getElementIndex(element: Element): number;
+  getElementIndex(element: HTMLElement): number;
 
   /**
    * Emit an event when a menu item is selected.
    */
-  notifySelected(evtData: MDCMenuItemEventDetail): void;
+  notifySelected(eventData: MDCMenuItemEventDetail): void;
 
   /** @return Returns the menu item count. */
   getMenuItemCount(): number;
 
   /**
    * Focuses the menu item at given index.
-   * @param index Index of the menu item that will be focused every time the menu opens.
+   * @param index Index of the menu item that will be focused every time the
+   *     menu opens.
    */
   focusItemAtIndex(index: number): void;
 
@@ -91,14 +93,16 @@ export interface MDCMenuAdapter {
   focusListRoot(): void;
 
   /**
-   * @return Returns selected list item index within the same selection group which is
+   * @return Returns selected list item index within the same selection group
+   *     which is
    * a sibling of item at given `index`.
    * @param index Index of the menu item with possible selected sibling.
    */
   getSelectedSiblingOfItemAtIndex(index: number): number;
 
   /**
-   * @return Returns true if item at specified index is contained within an `.mdc-menu__selection-group` element.
+   * @return Returns true if item at specified index is contained within an
+   *     `.mdc-menu__selection-group` element.
    * @param index Index of the selectable menu item.
    */
   isSelectableItemAtIndex(index: number): boolean;

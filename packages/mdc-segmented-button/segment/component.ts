@@ -38,7 +38,7 @@ import {MDCSegmentedButtonSegmentFoundation} from './foundation';
  * MDCSegmentedButtonSegment factory type.
  */
 export type MDCSegmentedButtonSegmentFactory =
-    (el: Element, foundation?: MDCSegmentedButtonSegmentFoundation) =>
+    (el: HTMLElement, foundation?: MDCSegmentedButtonSegmentFoundation) =>
         MDCSegmentedButtonSegment;
 
 /**
@@ -51,7 +51,7 @@ export class MDCSegmentedButtonSegment extends
     return this.rippleComponent;
   }
 
-  static override attachTo(root: Element) {
+  static override attachTo(root: HTMLElement) {
     return new MDCSegmentedButtonSegment(root);
   }
 
@@ -101,7 +101,7 @@ export class MDCSegmentedButtonSegment extends
         return this.root.getAttribute(attrName);
       },
       setAttr: (attrName, value) => {
-        this.root.setAttribute(attrName, value);
+        this.safeSetAttribute(this.root, attrName, value);
       },
       addClass: (className) => {
         this.root.classList.add(className);
@@ -114,11 +114,8 @@ export class MDCSegmentedButtonSegment extends
       },
       notifySelectedChange: (selected) => {
         this.emit<SegmentDetail>(
-            events.SELECTED, {
-              index: this.index,
-              selected,
-              segmentId: this.getSegmentId()
-            },
+            events.SELECTED,
+            {index: this.index, selected, segmentId: this.getSegmentId()},
             true /* shouldBubble */
         );
       },

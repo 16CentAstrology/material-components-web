@@ -23,7 +23,7 @@
 
 import {KEY} from '@material/dom/keyboard';
 
-import {getFixture} from '../../../testing/dom';
+import {createFixture, html} from '../../../testing/dom';
 import {createKeyboardEvent, emitEvent} from '../../../testing/dom/events';
 import {createMockFoundation} from '../../../testing/helpers/foundation';
 import {setUpMdcTestEnvironment} from '../../../testing/helpers/setup';
@@ -31,16 +31,11 @@ import {AnchorBoundaryType, CssClasses, numbers, XPosition, YPosition} from '../
 import {MDCTooltip, MDCTooltipFoundation} from '../index';
 
 function setupTestWithMockFoundation(fixture: HTMLElement) {
-  const tooltipElem = fixture.querySelector('#tt0') as HTMLElement;
-  const anchorElem = fixture.querySelector('[aria-describedby]') as HTMLElement;
+  const tooltipElem = fixture.querySelector<HTMLElement>('#tt0')!;
+  const anchorElem = fixture.querySelector<HTMLElement>('[aria-describedby]')!;
   const mockFoundation = createMockFoundation(MDCTooltipFoundation);
   const component = new MDCTooltip(tooltipElem, mockFoundation);
   return {anchorElem, tooltipElem, mockFoundation, component};
-}
-
-function isIE() {
-  return navigator.userAgent.indexOf('MSIE') !== -1 ||
-      navigator.userAgent.indexOf('Trident') !== -1;
 }
 
 describe('MDCTooltip', () => {
@@ -48,7 +43,7 @@ describe('MDCTooltip', () => {
   setUpMdcTestEnvironment();
   describe('plain tooltip tests', () => {
     beforeEach(() => {
-      fixture = getFixture(`<div>
+      fixture = createFixture(html`<div>
         <button aria-describedby="tt0">
           anchor
         </button>
@@ -67,17 +62,17 @@ describe('MDCTooltip', () => {
 
     it('attachTo returns a component instance', () => {
       expect(MDCTooltip.attachTo(
-                 fixture.querySelector('.mdc-tooltip') as HTMLElement))
+                 fixture.querySelector<HTMLElement>('.mdc-tooltip')!))
           .toEqual(jasmine.any(MDCTooltip));
     });
 
     it('attachTo throws an error when anchor element is missing', () => {
       const container =
-          fixture.querySelector('[aria-describedby]') as HTMLElement;
+          fixture.querySelector<HTMLElement>('[aria-describedby]')!;
       container.parentElement!.removeChild(container);
       expect(
           () => MDCTooltip.attachTo(
-              container.querySelector('.mdc-tooltip') as HTMLElement))
+              container.querySelector<HTMLElement>('.mdc-tooltip')!))
           .toThrow();
     });
 
@@ -232,7 +227,7 @@ describe('MDCTooltip', () => {
 
     it('detects tooltip labels that span multiple lines', () => {
       document.body.removeChild(fixture);
-      fixture = getFixture(`<div>
+      fixture = createFixture(html`<div>
         <button data-tooltip-id="tt0">
           anchor
         </button>
@@ -263,7 +258,7 @@ describe('MDCTooltip', () => {
 
   describe('default interactive rich tooltip tests', () => {
     beforeEach(() => {
-      fixture = getFixture(`<div>
+      fixture = createFixture(html`<div>
         <button data-tooltip-id="tt0" aria-haspopup="dialog" aria-expanded="false">
           anchor
         </button>
@@ -289,7 +284,7 @@ describe('MDCTooltip', () => {
 
     it('attachTo returns a component instance', () => {
       expect(MDCTooltip.attachTo(
-                 fixture.querySelector('.mdc-tooltip--rich') as HTMLElement))
+                 fixture.querySelector<HTMLElement>('.mdc-tooltip--rich')!))
           .toEqual(jasmine.any(MDCTooltip));
     });
 
@@ -383,11 +378,6 @@ describe('MDCTooltip', () => {
 
     it('aria-expanded becomes false on anchor when anchor blurs and non-tooltip element is focused',
        () => {
-         // FocusEvent is not supported on IE11 so this test will not be run on
-         // it.
-         if (isIE()) {
-           return;
-         }
          const tooltipElem = fixture.querySelector<HTMLElement>('#tt0')!;
          const anchorElem =
              fixture.querySelector<HTMLElement>('[data-tooltip-id]')!;
@@ -404,11 +394,6 @@ describe('MDCTooltip', () => {
 
     it('aria-expanded remains true on anchor when anchor blurs and rich tooltip focuses',
        () => {
-         // FocusEvent is not supported on IE11 so this test will not be run on
-         // it.
-         if (isIE()) {
-           return;
-         }
          const tooltipElem = fixture.querySelector<HTMLElement>('#tt0')!;
          const anchorElem =
              fixture.querySelector<HTMLElement>('[data-tooltip-id]')!;
@@ -425,11 +410,6 @@ describe('MDCTooltip', () => {
 
     it('aria-expanded becomes false on anchor when rich tooltip focuses out and anchor does not receive focus',
        () => {
-         // FocusEvent is not supported on IE11 so this test will not be run on
-         // it.
-         if (isIE()) {
-           return;
-         }
          const tooltipElem = fixture.querySelector<HTMLElement>('#tt0')!;
          const anchorElem =
              fixture.querySelector<HTMLElement>('[data-tooltip-id]')!;
@@ -446,11 +426,6 @@ describe('MDCTooltip', () => {
 
     it('aria-expanded remains true on anchor when rich tooltip focuses out and anchor receives focus',
        () => {
-         // FocusEvent is not supported on IE11 so this test will not be run on
-         // it.
-         if (isIE()) {
-           return;
-         }
          const tooltipElem = fixture.querySelector<HTMLElement>('#tt0')!;
          const anchorElem =
              fixture.querySelector<HTMLElement>('[data-tooltip-id]')!;
@@ -467,11 +442,6 @@ describe('MDCTooltip', () => {
 
     it('aria-expanded remains true on anchor when rich tooltip focuses out and element within tooltip receives focus',
        () => {
-         // FocusEvent is not supported on IE11 so this test will not be run on
-         // it.
-         if (isIE()) {
-           return;
-         }
          const tooltipElem = fixture.querySelector<HTMLElement>('#tt0')!;
          const tooltipContent =
              fixture.querySelector<HTMLElement>('.mdc-tooltip__content')!;
@@ -491,7 +461,7 @@ describe('MDCTooltip', () => {
 
   describe('persistent non-interactive rich tooltip tests', () => {
     beforeEach(() => {
-      fixture = getFixture(`<div>
+      fixture = createFixture(html`<div>
         <button aria-describedby="tt0">
           anchor
         </button>
@@ -636,11 +606,6 @@ describe('MDCTooltip', () => {
 
     it('aria-hidden becomes true on tooltip when anchor blurs and non-tooltip element is focused',
        () => {
-         // FocusEvent is not supported on IE11 so this test will not be run on
-         // it.
-         if (isIE()) {
-           return;
-         }
          const tooltipElem = fixture.querySelector<HTMLElement>('#tt0')!;
          const anchorElem =
              fixture.querySelector<HTMLElement>('[aria-describedby]')!;
@@ -657,11 +622,6 @@ describe('MDCTooltip', () => {
 
     it('aria-hidden remains false on tooltip when anchor blurs and rich tooltip focuses',
        () => {
-         // FocusEvent is not supported on IE11 so this test will not be run on
-         // it.
-         if (isIE()) {
-           return;
-         }
          const tooltipElem = fixture.querySelector<HTMLElement>('#tt0')!;
          const anchorElem =
              fixture.querySelector<HTMLElement>('[aria-describedby]')!;

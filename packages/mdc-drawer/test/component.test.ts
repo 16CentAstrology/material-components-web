@@ -22,7 +22,7 @@
  */
 
 import {MDCList} from '../../mdc-list/index';
-import {getFixture} from '../../../testing/dom';
+import {createFixture, html} from '../../../testing/dom';
 import {emitEvent} from '../../../testing/dom/events';
 import {createMockFoundation} from '../../../testing/helpers/foundation';
 import {setUpMdcTestEnvironment} from '../../../testing/helpers/setup';
@@ -37,11 +37,15 @@ interface DrawerSetupOptions {
   hasList: boolean;
 }
 
-const defaultSetupOptions = {variantClass: cssClasses.DISMISSIBLE, shadowRoot: false, hasList: true};
+const defaultSetupOptions = {
+  variantClass: cssClasses.DISMISSIBLE,
+  shadowRoot: false,
+  hasList: true
+};
 
 function getDrawerFixture(options: Partial<DrawerSetupOptions>): HTMLElement|
     DocumentFragment {
-  const listContent = `
+  const listContent = html`
     <div class="mdc-deprecated-list-group">
       <nav class="mdc-deprecated-list">
         <a class="mdc-deprecated-list-item mdc-deprecated-list-item--activated" href="#" aria-current="page">
@@ -50,17 +54,17 @@ function getDrawerFixture(options: Partial<DrawerSetupOptions>): HTMLElement|
       </nav>
     </div>
     `;
-  const drawerContent = `
+  const drawerContent = html`
     <div class="mdc-drawer ${options.variantClass}">
       <div class="mdc-drawer__content">
         ${options.hasList ? listContent : ''}
       </div>
     </div>
     `;
-  const scrimContent = `<div class="mdc-drawer-scrim"></div>`;
+  const scrimContent = html`<div class="mdc-drawer-scrim"></div>`;
   const isModal = options.variantClass === cssClasses.MODAL;
-  const drawerEl = getFixture(drawerContent);
-  const scrimEl = getFixture(scrimContent);
+  const drawerEl = createFixture(drawerContent);
+  const scrimEl = createFixture(scrimContent);
 
   if (options.shadowRoot) {
     const fragment = document.createDocumentFragment();
@@ -70,7 +74,7 @@ function getDrawerFixture(options: Partial<DrawerSetupOptions>): HTMLElement|
     }
     return fragment;
   } else {
-    return getFixture(`
+    return createFixture(html`
       <div class="body-content">
         ${drawerContent}
         ${isModal ? scrimContent : ''}
@@ -80,7 +84,7 @@ function getDrawerFixture(options: Partial<DrawerSetupOptions>): HTMLElement|
 
 function setupTest(options: Partial<DrawerSetupOptions> = defaultSetupOptions) {
   const root = getDrawerFixture(options);
-  const drawer = root.querySelector('.mdc-drawer') as HTMLElement;
+  const drawer = root.querySelector<HTMLElement>('.mdc-drawer')!;
   const component = new MDCDrawer(drawer);
   return {root, drawer, component};
 }
@@ -88,15 +92,23 @@ function setupTest(options: Partial<DrawerSetupOptions> = defaultSetupOptions) {
 function setupTestWithMocks(
     options: Partial<DrawerSetupOptions> = defaultSetupOptions) {
   const root = getDrawerFixture(options);
-  const drawer = root.querySelector('.mdc-drawer') as HTMLElement;
+  const drawer = root.querySelector<HTMLElement>('.mdc-drawer')!;
   const isModal = options.variantClass === cssClasses.MODAL;
   const mockFoundation = createMockFoundation(
       isModal ? MDCModalDrawerFoundation : MDCDismissibleDrawerFoundation);
   const mockFocusTrapInstance =
       jasmine.createSpyObj('FocusTrapInstance', ['trapFocus', 'releaseFocus']);
   const mockList = jasmine.createSpyObj('MDCList', ['wrapFocus', 'destroy']);
-  const component = new MDCDrawer(drawer, mockFoundation, () => mockFocusTrapInstance, () => mockList);
-  return {root, drawer, component, mockFoundation, mockFocusTrapInstance, mockList};
+  const component = new MDCDrawer(
+      drawer, mockFoundation, () => mockFocusTrapInstance, () => mockList);
+  return {
+    root,
+    drawer,
+    component,
+    mockFoundation,
+    mockFocusTrapInstance,
+    mockList
+  };
 }
 
 describe('MDCDrawer', () => {
@@ -106,7 +118,7 @@ describe('MDCDrawer', () => {
     const root = getDrawerFixture({
                    variantClass: cssClasses.DISMISSIBLE,
                    hasList: false
-                 }).querySelector('.mdc-drawer') as HTMLElement;
+                 }).querySelector<HTMLElement>('.mdc-drawer')!;
     expect(MDCDrawer.attachTo(root)).toEqual(jasmine.any(MDCDrawer));
   });
 
@@ -136,7 +148,7 @@ describe('MDCDrawer', () => {
   it('click event calls foundation.handleScrimClick method', () => {
     const {root, mockFoundation} =
         setupTestWithMocks({variantClass: cssClasses.MODAL});
-    const scrimEl = root.querySelector('.mdc-drawer-scrim') as HTMLElement;
+    const scrimEl = root.querySelector<HTMLElement>('.mdc-drawer-scrim')!;
     emitEvent(scrimEl, 'click');
     expect((mockFoundation as jasmine.SpyObj<MDCModalDrawerFoundation>)
                .handleScrimClick)
@@ -146,7 +158,9 @@ describe('MDCDrawer', () => {
   it('keydown event calls foundation.handleKeydown method', () => {
     const {drawer, mockFoundation} = setupTestWithMocks();
     // TODO(b/182902089): use list constants once code is migrated to evolution.
-    (drawer.querySelector('.mdc-deprecated-list-item') as HTMLElement).focus();
+    (drawer.querySelector<HTMLElement>('.mdc-deprecated-list-item') as
+     HTMLElement)
+        .focus();
     emitEvent(drawer, 'keydown');
     expect(mockFoundation.handleKeydown)
         .toHaveBeenCalledWith(jasmine.any(Object));
@@ -173,7 +187,9 @@ describe('MDCDrawer', () => {
     const {component, drawer, mockFoundation} = setupTestWithMocks();
     component.destroy();
     // TODO(b/182902089): use list constants once code is migrated to evolution.
-    (drawer.querySelector('.mdc-deprecated-list-item') as HTMLElement).focus();
+    (drawer.querySelector<HTMLElement>('.mdc-deprecated-list-item') as
+     HTMLElement)
+        .focus();
     emitEvent(drawer, 'keydown');
     expect(mockFoundation.handleKeydown)
         .not.toHaveBeenCalledWith(jasmine.any(Object));
@@ -206,16 +222,15 @@ describe('MDCDrawer', () => {
   it('adapter#addClass adds class to drawer', () => {
     const {component, drawer} = setupTest();
     (component.getDefaultFoundation() as any).adapter.addClass('test-class');
-    expect(drawer.classList.contains('test-class')).toBe(true);
+    expect(drawer).toHaveClass('test-class');
   });
 
   it('adapter#removeClass removes class from drawer', () => {
     const {component, drawer} = setupTest();
     (component.getDefaultFoundation() as any).adapter.addClass('test-class');
 
-    (component.getDefaultFoundation() as any)
-        .adapter.removeClass('test-class');
-    expect(drawer.classList.contains('test-class')).toBe(false);
+    (component.getDefaultFoundation() as any).adapter.removeClass('test-class');
+    expect(drawer).not.toHaveClass('test-class');
   });
 
   it('adapter#hasClass returns true when class is on drawer element', () => {
@@ -237,7 +252,7 @@ describe('MDCDrawer', () => {
   it('adapter#elementHasClass returns true when class is found on event target',
      () => {
        const {component} = setupTest();
-       const mockEventTarget = getFixture(`<div class="foo">bar</div>`);
+       const mockEventTarget = createFixture(html`<div class="foo">bar</div>`);
 
        expect((component.getDefaultFoundation() as any)
                   .adapter.elementHasClass(mockEventTarget, 'foo'))
@@ -246,13 +261,14 @@ describe('MDCDrawer', () => {
 
   it('adapter#restoreFocus restores focus to previously saved focus', () => {
     const {component, root} = setupTest();
-    const button = getFixture(`<button>Foo</button>`);
+    const button = createFixture(html`<button>Foo</button>`);
     document.body.appendChild(button);
     document.body.appendChild(root);
     button.focus();
 
     (component.getDefaultFoundation() as any).adapter.saveFocus();
-    (root.querySelector(strings.LIST_ITEM_ACTIVATED_SELECTOR) as HTMLElement)
+    (root.querySelector<HTMLElement>(strings.LIST_ITEM_ACTIVATED_SELECTOR) as
+     HTMLElement)
         .focus();
     (component.getDefaultFoundation() as any).adapter.restoreFocus();
 
@@ -264,8 +280,8 @@ describe('MDCDrawer', () => {
   it('adapter#restoreFocus focus shouldn\'t restore if focus is not within root element',
      () => {
        const {component, root} = setupTest();
-       const navButtonEl = getFixture(`<button>Foo</button>`);
-       const otherButtonEl = getFixture(`<button>Bar</button>`);
+       const navButtonEl = createFixture(html`<button>Foo</button>`);
+       const otherButtonEl = createFixture(html`<button>Bar</button>`);
        document.body.appendChild(navButtonEl);
        document.body.appendChild(otherButtonEl);
        document.body.appendChild(root);
@@ -284,17 +300,17 @@ describe('MDCDrawer', () => {
   it('adapter#restoreFocus focus is not restored if saveFocus never called',
      () => {
        const {component, root} = setupTest();
-       const button = getFixture(`<button>Foo</button>`);
+       const button = createFixture(html`<button>Foo</button>`);
        document.body.appendChild(button);
        document.body.appendChild(root);
        button.focus();
 
-       const navItem = root.querySelector(
-                           strings.LIST_ITEM_ACTIVATED_SELECTOR) as HTMLElement;
+       const navItem = root.querySelector<HTMLElement>(
+           strings.LIST_ITEM_ACTIVATED_SELECTOR)!;
        navItem.focus();
        (component.getDefaultFoundation() as any).adapter.restoreFocus();
 
-       expect(navItem).toEqual(document.activeElement as HTMLElement);
+       expect(document.activeElement).toEqual(navItem);
        document.body.removeChild(button);
        document.body.removeChild(root);
      });
@@ -345,8 +361,8 @@ describe('MDCDrawer', () => {
        (component.getDefaultFoundation() as any)
            .adapter.focusActiveNavigationItem();
 
-       const activatedNavigationItemEl =
-           root.querySelector(strings.LIST_ITEM_ACTIVATED_SELECTOR);
+       const activatedNavigationItemEl = root.querySelector<HTMLElement>(
+           strings.LIST_ITEM_ACTIVATED_SELECTOR);
        expect(document.activeElement).toEqual(activatedNavigationItemEl);
        document.body.removeChild(root);
      });
@@ -356,9 +372,8 @@ describe('MDCDrawer', () => {
        const {component, root} = setupTest();
        const prevActiveElement = document.activeElement;
        document.body.appendChild(root);
-       const activatedNavigationItemEl =
-           root.querySelector(strings.LIST_ITEM_ACTIVATED_SELECTOR) as
-           HTMLElement;
+       const activatedNavigationItemEl = root.querySelector<HTMLElement>(
+           strings.LIST_ITEM_ACTIVATED_SELECTOR)!;
        // TODO(b/182902089): use list constants once code has been migrated.
        activatedNavigationItemEl.classList.remove(
            'mdc-deprecated-list-item--activated');

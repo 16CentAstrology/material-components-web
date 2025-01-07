@@ -24,14 +24,14 @@
 import {MDCListFoundation} from '../../mdc-list/index';
 import {Corner} from '../../mdc-menu-surface/constants';
 import {MDCMenuSurfaceFoundation} from '../../mdc-menu-surface/foundation';
+import {createFixture, html} from '../../../testing/dom';
 import {emitEvent} from '../../../testing/dom/events';
 import {createMockFoundation} from '../../../testing/helpers/foundation';
 import {DefaultFocusState} from '../constants';
 import {MDCMenu, MDCMenuFoundation} from '../index';
 
 function getFixture(open = false) {
-  const wrapper = document.createElement('div');
-  wrapper.innerHTML = `
+  return createFixture(html`
     <div class="mdc-menu mdc-menu-surface ${
       open ? 'mdc-menu-surface--open' : ''}">
       <ul class="mdc-deprecated-list" role="menu" tabIndex="-1">
@@ -58,15 +58,11 @@ function getFixture(open = false) {
         </li>
       </ul>
     </div>
-  `;
-  const el = wrapper.firstElementChild as HTMLElement;
-  wrapper.removeChild(el);
-  return el;
+  `);
 }
 
 function getFixtureWithMultipleSelectionGroups(open = false) {
-  const wrapper = document.createElement('div');
-  wrapper.innerHTML = `
+  return createFixture(html`
     <div class="mdc-menu mdc-menu-surface ${
       open ? 'mdc-menu-surface--open' : ''}">
       <ul class="mdc-deprecated-list" role="menu" tabIndex="-1">
@@ -106,10 +102,7 @@ function getFixtureWithMultipleSelectionGroups(open = false) {
         </li>
       </ul>
     </div>
-  `;
-  const el = wrapper.firstElementChild as HTMLElement;
-  wrapper.removeChild(el);
-  return el;
+  `);
 }
 
 class FakeList {
@@ -123,8 +116,8 @@ class FakeList {
   getPrimaryText: jasmine.Spy = jasmine.createSpy('.getPrimaryText');
 
   constructor(root: HTMLElement) {
-    this.listElements =
-        [].slice.call(root.querySelectorAll('.mdc-deprecated-list-item'))
+    this.listElements = Array.from(
+        root.querySelectorAll<HTMLElement>('.mdc-deprecated-list-item'));
   }
 }
 
@@ -151,7 +144,7 @@ function setupTestWithFakes(open = false) {
   const mockFoundation = createMockFoundation(MDCMenuFoundation);
 
   const list =
-      new FakeList(root.querySelector('.mdc-deprecated-list') as HTMLElement);
+      new FakeList(root.querySelector<HTMLElement>('.mdc-deprecated-list')!);
   const component =
       new MDCMenu(root, mockFoundation, () => menuSurface, () => list);
   return {root, component, menuSurface, list, mockFoundation};
@@ -186,7 +179,7 @@ describe('MDCMenu', () => {
 
   it('destroy does not throw an error if the list is not instantiated', () => {
     const fixture = getFixture();
-    const list = fixture.querySelector('.mdc-deprecated-list') as HTMLElement;
+    const list = fixture.querySelector<HTMLElement>('.mdc-deprecated-list')!;
     (list.parentElement as HTMLElement).removeChild(list);
     const component = new MDCMenu(fixture);
 
@@ -319,28 +312,32 @@ describe('MDCMenu', () => {
 
   it('items returns all menu items', () => {
     const {root, component, list} = setupTestWithFakes();
-    const items = [].slice.call(root.querySelectorAll('[role="menuitem"]'));
+    const items =
+        Array.from(root.querySelectorAll<HTMLElement>('[role="menuitem"]'));
     list.listElements = items;
     expect(component.items).toEqual(items);
   });
 
   it('items returns nothing if list is not defined', () => {
     const {root, component, list} = setupTestWithFakes();
-    const items = [].slice.call(root.querySelectorAll('[role="menuitem"]'));
+    const items =
+        Array.from(root.querySelectorAll<HTMLElement>('[role="menuitem"]'));
     list.listElements = items;
     expect(component.items).toEqual(items);
   });
 
   it('getOptionByIndex', () => {
     const {root, component, list} = setupTestWithFakes();
-    const items = [].slice.call(root.querySelectorAll('[role="menuitem"]'));
+    const items =
+        Array.from(root.querySelectorAll<HTMLElement>('[role="menuitem"]'));
     list.listElements = items;
     expect(component.getOptionByIndex(0)).toEqual(items[0]);
   });
 
   it('getOptionByIndex returns null if index is > list length', () => {
     const {root, component, list} = setupTestWithFakes();
-    const items = [].slice.call(root.querySelectorAll('[role="menuitem"]'));
+    const items =
+        Array.from(root.querySelectorAll<HTMLElement>('[role="menuitem"]'));
     list.listElements = items;
     expect(component.getOptionByIndex(items.length)).toBe(null);
   });
@@ -392,9 +389,7 @@ describe('MDCMenu', () => {
     root.dispatchEvent(event);
 
     // TODO(b/182902089): use list constants once this code has been migrated.
-    expect((document.activeElement as HTMLElement)
-               .classList.contains('mdc-deprecated-list'))
-        .toBe(true);
+    expect(document.activeElement).toHaveClass('mdc-deprecated-list');
     document.body.removeChild(root);
   });
 
@@ -417,7 +412,7 @@ describe('MDCMenu', () => {
     let detail: any;
     component.listen(
         MDCMenuFoundation.strings.SELECTED_EVENT,
-        (evt: any) => detail = evt.detail);
+        (event: any) => detail = event.detail);
 
     document.body.appendChild(root);
     (component as any)
@@ -434,7 +429,7 @@ describe('MDCMenu', () => {
        const {component, root, list} = setupTestWithFakes();
        list.listElements = [];
        document.body.appendChild(root);
-       root.querySelector('.mdc-deprecated-list-item');
+       root.querySelector<HTMLElement>('.mdc-deprecated-list-item');
        expect(() => {
          component.open = true;
        }).not.toThrow();
@@ -456,38 +451,38 @@ describe('MDCMenu', () => {
      () => {
        const {root, component} = setupTest();
        const firstItem =
-           root.querySelector('.mdc-deprecated-list-item') as HTMLElement;
+           root.querySelector<HTMLElement>('.mdc-deprecated-list-item')!;
        (component.getDefaultFoundation() as any)
            .adapter.addClassToElementAtIndex(0, 'foo');
-       expect(firstItem.classList.contains('foo')).toBe(true);
+       expect(firstItem).toHaveClass('foo');
      });
 
   it('adapter#removeClassFromElementAtIndex adds a class to the element at the index provided',
      () => {
        const {root, component} = setupTest();
        const firstItem =
-           root.querySelector('.mdc-deprecated-list-item') as HTMLElement;
+           root.querySelector<HTMLElement>('.mdc-deprecated-list-item')!;
        firstItem.classList.add('foo');
        (component.getDefaultFoundation() as any)
            .adapter.removeClassFromElementAtIndex(0, 'foo');
-       expect(firstItem.classList.contains('foo')).toBe(false);
+       expect(firstItem).not.toHaveClass('foo');
      });
 
   it('adapter#addAttributeToElementAtIndex adds a class to the element at the index provided',
      () => {
        const {root, component} = setupTest();
        const firstItem =
-           root.querySelector('.mdc-deprecated-list-item') as HTMLElement;
+           root.querySelector<HTMLElement>('.mdc-deprecated-list-item')!;
        (component.getDefaultFoundation() as any)
-           .adapter.addAttributeToElementAtIndex(0, 'foo', 'true');
-       expect(firstItem.getAttribute('foo') === 'true').toBe(true);
+           .adapter.addAttributeToElementAtIndex(0, 'data-foo', 'true');
+       expect(firstItem.getAttribute('data-foo') === 'true').toBe(true);
      });
 
   it('adapter#removeAttributeFromElementAtIndex adds a class to the element at the index provided',
      () => {
        const {root, component} = setupTest();
        const firstItem =
-           root.querySelector('.mdc-deprecated-list-item') as HTMLElement;
+           root.querySelector<HTMLElement>('.mdc-deprecated-list-item')!;
        firstItem.setAttribute('foo', 'true');
        (component.getDefaultFoundation() as any)
            .adapter.removeAttributeFromElementAtIndex(0, 'foo');
@@ -498,7 +493,7 @@ describe('MDCMenu', () => {
      () => {
        const {root, component} = setupTest();
        const firstItem =
-           root.querySelector('.mdc-deprecated-list-item') as HTMLElement;
+           root.querySelector<HTMLElement>('.mdc-deprecated-list-item')!;
        firstItem.classList.add('foo');
        const containsFoo = (component.getDefaultFoundation() as any)
                                .adapter.elementContainsClass(firstItem, 'foo');
@@ -508,7 +503,8 @@ describe('MDCMenu', () => {
   it('adapter#elementContainsClass returns false if the class does not exist on the element',
      () => {
        const {root, component} = setupTest();
-       const firstItem = root.querySelector('.mdc-deprecated-list-item');
+       const firstItem =
+           root.querySelector<HTMLElement>('.mdc-deprecated-list-item');
        const containsFoo = (component.getDefaultFoundation() as any)
                                .adapter.elementContainsClass(firstItem, 'foo');
        expect(containsFoo).toBe(false);
@@ -525,7 +521,8 @@ describe('MDCMenu', () => {
   it('adapter#getElementIndex returns the index value of an element in the list',
      () => {
        const {root, component} = setupTest();
-       const firstItem = root.querySelector('.mdc-deprecated-list-item');
+       const firstItem =
+           root.querySelector<HTMLElement>('.mdc-deprecated-list-item');
        const indexValue = (component.getDefaultFoundation() as any)
                               .adapter.getElementIndex(firstItem);
        expect(indexValue).toEqual(0);
@@ -550,8 +547,7 @@ describe('MDCMenu', () => {
 
   it('adapter#getMenuItemCount returns the menu item count', () => {
     const {component} = setupTest();
-    expect(
-        (component.getDefaultFoundation() as any).adapter.getMenuItemCount())
+    expect((component.getDefaultFoundation() as any).adapter.getMenuItemCount())
         .toEqual(component.items.length);
   });
 
@@ -572,7 +568,7 @@ describe('MDCMenu', () => {
     (component.getDefaultFoundation() as any).adapter.focusListRoot();
     // TODO(b/182902089): use list constants once this code has been migrated.
     expect(document.activeElement)
-        .toEqual(root.querySelector('.mdc-deprecated-list'));
+        .toEqual(root.querySelector<HTMLElement>('.mdc-deprecated-list'));
 
     document.body.removeChild(root);
   });

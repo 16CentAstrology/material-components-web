@@ -22,6 +22,7 @@
  */
 
 import {MDCFoundation} from '@material/base/foundation';
+import {SpecificEventListener} from '@material/base/types';
 
 import {MDCMenuSurfaceAdapter} from './adapter';
 import {Corner, CornerBit, cssClasses, numbers, strings} from './constants';
@@ -36,6 +37,7 @@ interface AutoLayoutMeasurements {
   windowScroll: MDCMenuPoint;
 }
 
+/** MDC Menu Surface Foundation */
 export class MDCMenuSurfaceFoundation extends
     MDCFoundation<MDCMenuSurfaceAdapter> {
   static override get cssClasses() {
@@ -85,6 +87,8 @@ export class MDCMenuSurfaceFoundation extends
       notifyClosing: () => undefined,
       notifyOpen: () => undefined,
       notifyOpening: () => undefined,
+      registerWindowEventHandler: () => undefined,
+      deregisterWindowEventHandler: () => undefined,
     };
     // tslint:enable:object-literal-sort-keys
   }
@@ -103,6 +107,9 @@ export class MDCMenuSurfaceFoundation extends
   private animationRequestId = 0;
 
   private anchorCorner: Corner = Corner.TOP_START;
+
+  private resizeListener!:
+      SpecificEventListener<'resize'>;  // Assigned in #initialize.
 
   /**
    * Corner of the menu surface to which menu surface is attached to anchor.
@@ -140,6 +147,9 @@ export class MDCMenuSurfaceFoundation extends
     if (this.adapter.hasClass(OPEN)) {
       this.isSurfaceOpen = true;
     }
+
+    this.resizeListener = this.handleResize.bind(this);
+    this.adapter.registerWindowEventHandler('resize', this.resizeListener);
   }
 
   override destroy() {
@@ -147,6 +157,8 @@ export class MDCMenuSurfaceFoundation extends
     clearTimeout(this.closeAnimationEndTimerId);
     // Cancel any currently running animations.
     cancelAnimationFrame(this.animationRequestId);
+
+    this.adapter.deregisterWindowEventHandler('resize', this.resizeListener);
   }
 
   /**
@@ -264,6 +276,8 @@ export class MDCMenuSurfaceFoundation extends
 
       this.isSurfaceOpen = true;
     }
+
+    this.adapter.registerWindowEventHandler('resize', this.resizeListener);
   }
 
   /**
@@ -275,6 +289,7 @@ export class MDCMenuSurfaceFoundation extends
     }
 
     this.adapter.notifyClosing();
+    this.adapter.deregisterWindowEventHandler('resize', this.resizeListener);
 
     if (this.isQuickOpen) {
       this.isSurfaceOpen = false;
@@ -310,8 +325,8 @@ export class MDCMenuSurfaceFoundation extends
   }
 
   /** Handle clicks and close if not within menu-surface element. */
-  handleBodyClick(evt: MouseEvent) {
-    const el = evt.target as Element;
+  handleBodyClick(event: MouseEvent) {
+    const el = event.target as Element;
     if (this.adapter.isElementInContainer(el)) {
       return;
     }
@@ -319,13 +334,19 @@ export class MDCMenuSurfaceFoundation extends
   }
 
   /** Handle keys that close the surface. */
-  handleKeydown(evt: KeyboardEvent) {
-    const {keyCode, key} = evt;
+  handleKeydown(event: KeyboardEvent) {
+    const {keyCode, key} = event;
 
     const isEscape = key === 'Escape' || keyCode === 27;
     if (isEscape) {
       this.close();
     }
+  }
+
+  /** Handles resize events on the window. */
+  private handleResize() {
+    this.dimensions = this.adapter.getInnerDimensions();
+    this.autoposition();
   }
 
   private autoposition() {

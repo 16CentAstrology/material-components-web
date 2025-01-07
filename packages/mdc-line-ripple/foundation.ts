@@ -23,16 +23,20 @@
 
 import {MDCFoundation} from '@material/base/foundation';
 import {SpecificEventListener} from '@material/base/types';
+
 import {MDCLineRippleAdapter} from './adapter';
 import {cssClasses} from './constants';
 
-export class MDCLineRippleFoundation extends MDCFoundation<MDCLineRippleAdapter> {
+/** MDC Line Ripple Foundation */
+export class MDCLineRippleFoundation extends
+    MDCFoundation<MDCLineRippleAdapter> {
   static override get cssClasses() {
     return cssClasses;
   }
 
   /**
-   * See {@link MDCLineRippleAdapter} for typing information on parameters and return types.
+   * See {@link MDCLineRippleAdapter} for typing information on parameters and
+   * return types.
    */
   static override get defaultAdapter(): MDCLineRippleAdapter {
     // tslint:disable:object-literal-sort-keys Methods should be in the same order as the adapter interface.
@@ -52,8 +56,8 @@ export class MDCLineRippleFoundation extends MDCFoundation<MDCLineRippleAdapter>
   constructor(adapter?: Partial<MDCLineRippleAdapter>) {
     super({...MDCLineRippleFoundation.defaultAdapter, ...adapter});
 
-    this.transitionEndHandler = (evt) => {
-      this.handleTransitionEnd(evt);
+    this.transitionEndHandler = (event) => {
+      this.handleTransitionEnd(event);
     };
   }
 
@@ -80,13 +84,13 @@ export class MDCLineRippleFoundation extends MDCFoundation<MDCLineRippleAdapter>
     this.adapter.addClass(cssClasses.LINE_RIPPLE_DEACTIVATING);
   }
 
-  handleTransitionEnd(evt: TransitionEvent) {
+  handleTransitionEnd(event: TransitionEvent) {
     // Wait for the line ripple to be either transparent or opaque
     // before emitting the animation end event
     const isDeactivating =
         this.adapter.hasClass(cssClasses.LINE_RIPPLE_DEACTIVATING);
 
-    if (evt.propertyName === 'opacity') {
+    if (event.propertyName === 'opacity') {
       if (isDeactivating) {
         this.adapter.removeClass(cssClasses.LINE_RIPPLE_ACTIVE);
         this.adapter.removeClass(cssClasses.LINE_RIPPLE_DEACTIVATING);

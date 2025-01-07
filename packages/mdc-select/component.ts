@@ -33,6 +33,7 @@ import {MDCNotchedOutline, MDCNotchedOutlineFactory} from '@material/notched-out
 import {MDCRippleAdapter} from '@material/ripple/adapter';
 import {MDCRipple} from '@material/ripple/component';
 import {MDCRippleFoundation} from '@material/ripple/foundation';
+
 import {MDCSelectAdapter} from './adapter';
 import {cssClasses, strings} from './constants';
 import {MDCSelectFoundation} from './foundation';
@@ -40,8 +41,9 @@ import {MDCSelectHelperText, MDCSelectHelperTextFactory} from './helper-text/com
 import {MDCSelectIcon, MDCSelectIconFactory} from './icon/component';
 import {MDCSelectEventDetail, MDCSelectFoundationMap} from './types';
 
+/** MDC Select */
 export class MDCSelect extends MDCComponent<MDCSelectFoundation> {
-  static override attachTo(root: Element): MDCSelect {
+  static override attachTo(root: HTMLElement): MDCSelect {
     return new MDCSelect(root);
   }
 
@@ -49,11 +51,11 @@ export class MDCSelect extends MDCComponent<MDCSelectFoundation> {
 
   private menu!: MDCMenu;  // assigned in menuSetup()
 
-  private selectAnchor!: HTMLElement;       // assigned in initialize()
-  private selectedText!: HTMLElement;       // assigned in initialize()
+  private selectAnchor!: HTMLElement;           // assigned in initialize()
+  private selectedText!: HTMLElement;           // assigned in initialize()
   private hiddenInput!: HTMLInputElement|null;  // assigned in initialize()
 
-  private menuElement!: Element;                  // assigned in menuSetup()
+  private menuElement!: HTMLElement;              // assigned in menuSetup()
   private menuItemValues!: string[];              // assigned in menuSetup()
   private leadingIcon?: MDCSelectIcon;            // assigned in initialize()
   private helperText!: MDCSelectHelperText|null;  // assigned in initialize()
@@ -82,16 +84,16 @@ export class MDCSelect extends MDCComponent<MDCSelectFoundation> {
           MDCSelectHelperTextFactory = (el) => new MDCSelectHelperText(el),
   ) {
     this.selectAnchor =
-        this.root.querySelector(strings.SELECT_ANCHOR_SELECTOR) as HTMLElement;
+        this.root.querySelector<HTMLElement>(strings.SELECT_ANCHOR_SELECTOR)!;
     this.selectedText =
-        this.root.querySelector(strings.SELECTED_TEXT_SELECTOR) as HTMLElement;
-    this.hiddenInput = this.root.querySelector(strings.HIDDEN_INPUT_SELECTOR) as
-        HTMLInputElement;
+        this.root.querySelector<HTMLElement>(strings.SELECTED_TEXT_SELECTOR)!;
+    this.hiddenInput = this.root.querySelector<HTMLInputElement>(
+        strings.HIDDEN_INPUT_SELECTOR)!;
 
     if (!this.selectedText) {
       throw new Error(
           'MDCSelect: Missing required element: The following selector must be present: ' +
-          `'${strings.SELECTED_TEXT_SELECTOR}'`,
+              `'${strings.SELECTED_TEXT_SELECTOR}'`,
       );
     }
 
@@ -105,18 +107,21 @@ export class MDCSelect extends MDCComponent<MDCSelectFoundation> {
 
     this.menuSetup(menuFactory);
 
-    const labelElement = this.root.querySelector(strings.LABEL_SELECTOR);
+    const labelElement =
+        this.root.querySelector<HTMLElement>(strings.LABEL_SELECTOR);
     this.label = labelElement ? labelFactory(labelElement) : null;
 
     const lineRippleElement =
-        this.root.querySelector(strings.LINE_RIPPLE_SELECTOR);
+        this.root.querySelector<HTMLElement>(strings.LINE_RIPPLE_SELECTOR);
     this.lineRipple =
         lineRippleElement ? lineRippleFactory(lineRippleElement) : null;
 
-    const outlineElement = this.root.querySelector(strings.OUTLINE_SELECTOR);
+    const outlineElement =
+        this.root.querySelector<HTMLElement>(strings.OUTLINE_SELECTOR);
     this.outline = outlineElement ? outlineFactory(outlineElement) : null;
 
-    const leadingIcon = this.root.querySelector(strings.LEADING_ICON_SELECTOR);
+    const leadingIcon =
+        this.root.querySelector<HTMLElement>(strings.LEADING_ICON_SELECTOR);
     if (leadingIcon) {
       this.leadingIcon = iconFactory(leadingIcon);
     }
@@ -137,15 +142,15 @@ export class MDCSelect extends MDCComponent<MDCSelectFoundation> {
     this.handleBlur = () => {
       this.foundation.handleBlur();
     };
-    this.handleClick = (evt) => {
+    this.handleClick = (event) => {
       this.selectAnchor.focus();
-      this.foundation.handleClick(this.getNormalizedXCoordinate(evt));
+      this.foundation.handleClick(this.getNormalizedXCoordinate(event));
     };
-    this.handleKeydown = (evt) => {
-      this.foundation.handleKeydown(evt);
+    this.handleKeydown = (event) => {
+      this.foundation.handleKeydown(event);
     };
-    this.handleMenuItemAction = (evt) => {
-      this.foundation.handleMenuItemAction(evt.detail.index);
+    this.handleMenuItemAction = (event) => {
+      this.foundation.handleMenuItemAction(event.detail.index);
     };
     this.handleMenuOpened = () => {
       this.foundation.handleMenuOpened();
@@ -336,8 +341,9 @@ export class MDCSelect extends MDCComponent<MDCSelectFoundation> {
   }
 
   override getDefaultFoundation() {
-    // DO NOT INLINE this variable. For backward compatibility, foundations take a Partial<MDCFooAdapter>.
-    // To ensure we don't accidentally omit any methods, we need a separate, strongly typed adapter variable.
+    // DO NOT INLINE this variable. For backward compatibility, foundations take
+    // a Partial<MDCFooAdapter>. To ensure we don't accidentally omit any
+    // methods, we need a separate, strongly typed adapter variable.
     const adapter: MDCSelectAdapter = {
       ...this.getSelectAdapterMethods(),
       ...this.getCommonAdapterMethods(),
@@ -351,7 +357,8 @@ export class MDCSelect extends MDCComponent<MDCSelectFoundation> {
    * Handles setup for the menu.
    */
   private menuSetup(menuFactory: MDCMenuFactory) {
-    this.menuElement = this.root.querySelector(strings.MENU_SELECTOR)!;
+    this.menuElement =
+        this.root.querySelector<HTMLElement>(strings.MENU_SELECTOR)!;
     this.menu = menuFactory(this.menuElement);
     this.menu.hasTypeahead = true;
     this.menu.singleSelection = true;
@@ -360,16 +367,17 @@ export class MDCSelect extends MDCComponent<MDCSelectFoundation> {
   }
 
   private createRipple(): MDCRipple {
-    // DO NOT INLINE this variable. For backward compatibility, foundations take a Partial<MDCFooAdapter>.
-    // To ensure we don't accidentally omit any methods, we need a separate, strongly typed adapter variable.
+    // DO NOT INLINE this variable. For backward compatibility, foundations take
+    // a Partial<MDCFooAdapter>. To ensure we don't accidentally omit any
+    // methods, we need a separate, strongly typed adapter variable.
     // tslint:disable:object-literal-sort-keys Methods should be in the same order as the adapter interface.
     const adapter: MDCRippleAdapter = {
       ...MDCRipple.createAdapter({root: this.selectAnchor}),
-      registerInteractionHandler: (evtType, handler) => {
-        this.selectAnchor.addEventListener(evtType, handler);
+      registerInteractionHandler: (eventType, handler) => {
+        this.selectAnchor.addEventListener(eventType, handler);
       },
-      deregisterInteractionHandler: (evtType, handler) => {
-        this.selectAnchor.removeEventListener(evtType, handler);
+      deregisterInteractionHandler: (eventType, handler) => {
+        this.selectAnchor.removeEventListener(eventType, handler);
       },
     };
     // tslint:enable:object-literal-sort-keys
@@ -387,7 +395,7 @@ export class MDCSelect extends MDCComponent<MDCSelectFoundation> {
         let index = this.menu.selectedIndex;
         if (index === -1) return;
         index = index instanceof Array ? index[0] : index;
-        const selectedItem = (this.menu.items[index] as HTMLElement);
+        const selectedItem = this.menu.items[index];
         if (!selectedItem) return;
         this.selectedText.setAttribute(
             'aria-label', selectedItem.getAttribute('aria-label') || '');
@@ -396,7 +404,7 @@ export class MDCSelect extends MDCComponent<MDCSelectFoundation> {
       getSelectAnchorAttr: (attr: string) =>
           this.selectAnchor.getAttribute(attr),
       setSelectAnchorAttr: (attr: string, value: string) => {
-        this.selectAnchor.setAttribute(attr, value);
+        this.safeSetAttribute(this.selectAnchor, attr, value);
       },
       removeSelectAnchorAttr: (attr: string) => {
         this.selectAnchor.removeAttribute(attr);
@@ -414,7 +422,7 @@ export class MDCSelect extends MDCComponent<MDCSelectFoundation> {
         this.menu.open = false;
       },
       getAnchorElement: () =>
-          this.root.querySelector(strings.SELECT_ANCHOR_SELECTOR)!,
+          this.root.querySelector<HTMLElement>(strings.SELECT_ANCHOR_SELECTOR)!,
       setMenuAnchorElement: (anchorEl: HTMLElement) => {
         this.menu.setAnchorElement(anchorEl);
       },
@@ -432,7 +440,7 @@ export class MDCSelect extends MDCComponent<MDCSelectFoundation> {
         this.menu.selectedIndex = index;
       },
       focusMenuItemAtIndex: (index: number) => {
-        (this.menu.items[index] as HTMLElement).focus();
+        this.menu.items[index]?.focus();
       },
       getMenuItemCount: () => this.menu.items.length,
       // Cache menu item values. layoutOptions() updates this cache.
@@ -457,7 +465,7 @@ export class MDCSelect extends MDCComponent<MDCSelectFoundation> {
       },
       hasClass: (className: string) => this.root.classList.contains(className),
       setRippleCenter: (normalizedX: number) => {
-        this.lineRipple && this.lineRipple.setRippleCenter(normalizedX)
+        this.lineRipple && this.lineRipple.setRippleCenter(normalizedX);
       },
       activateBottomLine: () => {
         this.lineRipple && this.lineRipple.activate();
@@ -508,17 +516,18 @@ export class MDCSelect extends MDCComponent<MDCSelectFoundation> {
   }
 
   /**
-   * Calculates where the line ripple should start based on the x coordinate within the component.
+   * Calculates where the line ripple should start based on the x coordinate
+   * within the component.
    */
-  private getNormalizedXCoordinate(evt: MouseEvent|TouchEvent): number {
-    const targetClientRect = (evt.target as Element).getBoundingClientRect();
+  private getNormalizedXCoordinate(event: MouseEvent|TouchEvent): number {
+    const targetClientRect = (event.target as Element).getBoundingClientRect();
     const xCoordinate =
-        this.isTouchEvent(evt) ? evt.touches[0].clientX : evt.clientX;
+        this.isTouchEvent(event) ? event.touches[0].clientX : event.clientX;
     return xCoordinate - targetClientRect.left;
   }
 
-  private isTouchEvent(evt: MouseEvent|TouchEvent): evt is TouchEvent {
-    return Boolean((evt as TouchEvent).touches);
+  private isTouchEvent(event: MouseEvent|TouchEvent): event is TouchEvent {
+    return Boolean((event as TouchEvent).touches);
   }
 
   /**

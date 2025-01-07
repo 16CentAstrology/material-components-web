@@ -102,6 +102,14 @@
     }
   }
 
+  // Always remove the focus ring element from flexbox layout; even if it's
+  // not visible initially.
+  .mdc-deprecated-list-item__focus-ring {
+    @include feature-targeting.targets($feat-structure) {
+      position: absolute;
+    }
+  }
+
   .mdc-deprecated-list-item {
     @include feature-targeting.targets($feat-structure) {
       @include deprecated-item-base_;
@@ -533,51 +541,6 @@
     @include deprecated-item-interactive-ripple_($query);
   }
 
-  // Set styles only for focus state on disabled list item.
-  .mdc-deprecated-list-item--disabled {
-    @include ripple.surface(
-      $ripple-target: variables.$deprecated-ripple-target,
-      $query: $query
-    );
-    @include ripple.surface(
-      $ripple-target: variables.$deprecated-temporary-ripple-target,
-      $query: $query
-    );
-    @include ripple.radius-bounded(
-      $ripple-target: variables.$deprecated-ripple-target,
-      $query: $query
-    );
-    @include ripple.radius-bounded(
-      $ripple-target: variables.$deprecated-temporary-ripple-target,
-      $query: $query
-    );
-    @include ripple-theme.states-base-color(
-      theme-color.prop-value(on-surface),
-      $ripple-target: variables.$deprecated-ripple-target,
-      $query: $query
-    );
-    @include ripple-theme.states-base-color(
-      theme-color.prop-value(on-surface),
-      $ripple-target: variables.$deprecated-temporary-ripple-target,
-      $query: $query
-    );
-    @include ripple-theme.states-focus-opacity(
-      ripple-theme.states-opacity(primary, focus),
-      $ripple-target: variables.$deprecated-ripple-target,
-      $query: $query
-    );
-    @include ripple-theme.states-focus-opacity(
-      ripple-theme.states-opacity(primary, focus),
-      $ripple-target: variables.$deprecated-temporary-ripple-target,
-      $query: $query
-    );
-
-    #{variables.$deprecated-ripple-target},
-    #{variables.$deprecated-temporary-ripple-target} {
-      @include ripple.target-common($query: $query);
-    }
-  }
-
   @include evolution-mixins.with-ripple($query: $query);
 }
 
@@ -619,7 +582,7 @@
   $feat-color: feature-targeting.create-target($query, color);
 
   @include feature-targeting.targets($feat-color) {
-    @include theme.prop(color, $color);
+    @include theme.property(color, $color);
   }
 }
 
@@ -631,7 +594,7 @@
 
   .mdc-deprecated-list-item__secondary-text {
     @include feature-targeting.targets($feat-color) {
-      @include theme.prop(color, $color);
+      @include theme.property(color, $color);
     }
   }
 }
@@ -644,7 +607,7 @@
 
   .mdc-deprecated-list-item__graphic {
     @include feature-targeting.targets($feat-color) {
-      @include theme.prop(background-color, $color);
+      @include theme.property(background-color, $color);
     }
   }
 }
@@ -657,7 +620,7 @@
 
   .mdc-deprecated-list-item__graphic {
     @include feature-targeting.targets($feat-color) {
-      @include theme.prop(color, $color);
+      @include theme.property(color, $color);
     }
   }
 }
@@ -667,7 +630,7 @@
 
   .mdc-deprecated-list-item__meta {
     @include feature-targeting.targets($feat-color) {
-      @include theme.prop(color, $color);
+      @include theme.property(color, $color);
     }
   }
 }
@@ -710,7 +673,7 @@
 
   .mdc-deprecated-list-divider {
     @include feature-targeting.targets($feat-color) {
-      @include theme.prop(border-bottom-color, $color);
+      @include theme.property(border-bottom-color, $color);
     }
   }
 }
@@ -723,7 +686,7 @@
 
   .mdc-deprecated-list-group__subheader {
     @include feature-targeting.targets($feat-color) {
-      @include theme.prop(color, $color);
+      @include theme.property(color, $color);
     }
   }
 }
@@ -752,7 +715,7 @@
     .mdc-deprecated-list-item__primary-text,
     .mdc-deprecated-list-item__secondary-text {
       @include feature-targeting.targets($feat-color) {
-        @include theme.prop(color, $color);
+        @include theme.property(color, $color);
       }
     }
   }

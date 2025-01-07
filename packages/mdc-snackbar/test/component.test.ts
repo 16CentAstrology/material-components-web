@@ -21,14 +21,14 @@
  * THE SOFTWARE.
  */
 
+import {createFixture, html} from '../../../testing/dom';
 import {emitEvent} from '../../../testing/dom/events';
 import {createMockFoundation} from '../../../testing/helpers/foundation';
 import {numbers, strings} from '../constants';
 import {MDCSnackbar, MDCSnackbarFoundation} from '../index';
 
 function getFixture() {
-  const wrapper = document.createElement('div');
-  wrapper.innerHTML = `
+  return createFixture(html`
     <div>
       <aside class="mdc-snackbar">
         <div class="mdc-snackbar__surface" role="status" aria-relevant="additions">
@@ -40,19 +40,18 @@ function getFixture() {
           </div>
         </div>
       </aside>
-    </div>`;
-  const el = wrapper.firstElementChild as HTMLElement;
-  wrapper.removeChild(el);
-  return el;
+    </div>`);
 }
 
 function setupTest(fixture = getFixture()) {
   const root = fixture;
-  const surface = fixture.querySelector(strings.SURFACE_SELECTOR)!;
-  const label = fixture.querySelector(strings.LABEL_SELECTOR)!;
-  const actions = fixture.querySelector('.mdc-snackbar__actions')!;
-  const actionButton = fixture.querySelector(strings.ACTION_SELECTOR)!;
-  const actionIcon = fixture.querySelector(strings.DISMISS_SELECTOR)!;
+  const surface = fixture.querySelector<HTMLElement>(strings.SURFACE_SELECTOR)!;
+  const label = fixture.querySelector<HTMLElement>(strings.LABEL_SELECTOR)!;
+  const actions = fixture.querySelector<HTMLElement>('.mdc-snackbar__actions')!;
+  const actionButton =
+      fixture.querySelector<HTMLElement>(strings.ACTION_SELECTOR)!;
+  const actionIcon =
+      fixture.querySelector<HTMLElement>(strings.DISMISS_SELECTOR)!;
   const announce = jasmine.createSpy('announce');
   const component = new MDCSnackbar(root, undefined, () => announce);
   return {
@@ -69,11 +68,13 @@ function setupTest(fixture = getFixture()) {
 
 function setupTestWithMocks(fixture = getFixture()) {
   const root = fixture;
-  const surface = fixture.querySelector(strings.SURFACE_SELECTOR)!;
-  const label = fixture.querySelector(strings.LABEL_SELECTOR)!;
-  const actions = fixture.querySelector('.mdc-snackbar__actions')!;
-  const actionButton = fixture.querySelector(strings.ACTION_SELECTOR)!;
-  const actionIcon = fixture.querySelector(strings.DISMISS_SELECTOR)!;
+  const surface = fixture.querySelector<HTMLElement>(strings.SURFACE_SELECTOR)!;
+  const label = fixture.querySelector<HTMLElement>(strings.LABEL_SELECTOR)!;
+  const actions = fixture.querySelector<HTMLElement>('.mdc-snackbar__actions')!;
+  const actionButton =
+      fixture.querySelector<HTMLElement>(strings.ACTION_SELECTOR)!;
+  const actionIcon =
+      fixture.querySelector<HTMLElement>(strings.DISMISS_SELECTOR)!;
 
   const mockFoundation = createMockFoundation(MDCSnackbarFoundation);
   const announce = jasmine.createSpy('announce');
@@ -257,14 +258,14 @@ describe('MDCSnackbar', () => {
   it('adapter#addClass adds a class to the root element', () => {
     const {root, component} = setupTest();
     (component.getDefaultFoundation() as any).adapter.addClass('foo');
-    expect(root.classList.contains('foo')).toBe(true);
+    expect(root).toHaveClass('foo');
   });
 
   it('adapter#removeClass removes a class from the root element', () => {
     const {root, component} = setupTest();
     root.classList.add('foo');
     (component.getDefaultFoundation() as any).adapter.removeClass('foo');
-    expect(root.classList.contains('foo')).toBe(false);
+    expect(root).not.toHaveClass('foo');
   });
 
   it(`adapter#notifyOpening emits ${strings.OPENING_EVENT}`, () => {

@@ -25,18 +25,15 @@ import {MDCIconButtonToggle, MDCIconButtonToggleFoundation} from '../../mdc-icon
 import {cssClasses} from '../../mdc-ripple/constants';
 import {MDCRipple} from '../../mdc-ripple/index';
 import {supportsCssVariables} from '../../mdc-ripple/util';
+import {createFixture, html} from '../../../testing/dom';
 import {emitEvent} from '../../../testing/dom/events';
 import {createMockFoundation as mockFoundationCreator} from '../../../testing/helpers/foundation';
 import {setUpMdcTestEnvironment} from '../../../testing/helpers/setup';
 
 function getFixture() {
-  const wrapper = document.createElement('div');
-  wrapper.innerHTML = `
+  return createFixture(html`
     <button></button>
-  `;
-  const el = wrapper.firstElementChild as HTMLElement;
-  wrapper.removeChild(el);
-  return el;
+  `);
 }
 
 function setupTest({createMockFoundation = false} = {}) {
@@ -64,7 +61,7 @@ describe('MDCIconButtonToggle', () => {
     it('#constructor initializes the ripple on the root element', () => {
       const {root} = setupTest();
       jasmine.clock().tick(1);
-      expect(root.classList.contains('mdc-ripple-upgraded')).toBe(true);
+      expect(root).toHaveClass('mdc-ripple-upgraded');
     });
 
     it('#destroy removes the ripple', () => {
@@ -72,7 +69,7 @@ describe('MDCIconButtonToggle', () => {
       jasmine.clock().tick(1);
       component.destroy();
       jasmine.clock().tick(1);
-      expect(root.classList.contains('mdc-ripple-upgraded')).toBe(false);
+      expect(root).not.toHaveClass('mdc-ripple-upgraded');
     });
   }
 
@@ -95,14 +92,14 @@ describe('MDCIconButtonToggle', () => {
   it('#adapter.addClass adds a class to the root element', () => {
     const {root, component} = setupTest();
     (component.getDefaultFoundation() as any).adapter.addClass('foo');
-    expect(root.classList.contains('foo')).toBe(true);
+    expect(root).toHaveClass('foo');
   });
 
   it('#adapter.removeClass removes a class from the root element', () => {
     const {root, component} = setupTest();
     root.classList.add('foo');
     (component.getDefaultFoundation() as any).adapter.removeClass('foo');
-    expect(root.classList.contains('foo')).toBe(false);
+    expect(root).not.toHaveClass('foo');
   });
 
   it('#adapter.setAttr sets an attribute on the root element', () => {
@@ -126,13 +123,13 @@ describe('MDCIconButtonToggle', () => {
   it('assert keydown does not trigger ripple', () => {
     const {root} = setupTest();
     emitEvent(root, 'keydown');
-    expect(root.classList.contains(cssClasses.FG_ACTIVATION)).toBe(false);
+    expect(root).not.toHaveClass(cssClasses.FG_ACTIVATION);
   });
 
   it('assert keyup does not trigger ripple', () => {
     const {root} = setupTest();
     emitEvent(root, 'keyup');
-    expect(root.classList.contains(cssClasses.FG_ACTIVATION)).toBe(false);
+    expect(root).not.toHaveClass(cssClasses.FG_ACTIVATION);
   });
 
   it('click handler is added to root element', () => {

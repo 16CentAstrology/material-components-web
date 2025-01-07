@@ -68,6 +68,7 @@ function createModifierChecker(event?: KeyboardEvent|MouseEvent) {
       modifiers.length === eventModifiers.size;
 }
 
+/** MDC List Foundation */
 export class MDCListFoundation extends MDCFoundation<MDCListAdapter> {
   static override get strings() {
     return strings;
@@ -134,6 +135,7 @@ export class MDCListFoundation extends MDCFoundation<MDCListAdapter> {
     // TODO(b/172274142): consider all items when determining the list's type.
     if (this.adapter.hasCheckboxAtIndex(0)) {
       this.isCheckboxList = true;
+      this.selectedIndex = [];
     } else if (this.adapter.hasRadioAtIndex(0)) {
       this.isRadioList = true;
     } else {
@@ -428,7 +430,9 @@ export class MDCListFoundation extends MDCFoundation<MDCListAdapter> {
               [] :
               this.selectedIndex as number[],
           true);
-    } else if ((isEnter || isSpace) && eventHasModifiers([])) {
+    } else if (
+        (isEnter || isSpace) &&
+        (eventHasModifiers([]) || eventHasModifiers(['Alt']))) {
       if (isRootListItem) {
         // Return early if enter key is pressed on anchor element which triggers
         // synthetic MouseEvent event.
@@ -758,7 +762,7 @@ export class MDCListFoundation extends MDCFoundation<MDCListAdapter> {
   }
 
   /**
-   * Helper method for ensuring that the list of selected indicies remains
+   * Helper method for ensuring that the list of selected indices remains
    * accurate when calling setCheckboxAtIndex with omitDisabledItems set to
    * true.
    */
@@ -924,7 +928,7 @@ export class MDCListFoundation extends MDCFoundation<MDCListAdapter> {
     return i === listSize ? numbers.UNSET_INDEX : i;
   }
 
-  private isIndexValid(index: MDCListIndex, validateListType: boolean = true) {
+  private isIndexValid(index: MDCListIndex, validateListType = true) {
     if (index instanceof Array) {
       if (!this.isCheckboxList && validateListType) {
         throw new Error(

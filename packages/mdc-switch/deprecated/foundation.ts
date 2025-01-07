@@ -22,9 +22,11 @@
  */
 
 import {MDCFoundation} from '@material/base/foundation';
+
 import {MDCSwitchAdapter} from './adapter';
 import {cssClasses, strings} from './constants';
 
+/** MDC Switch Foundation */
 export class MDCSwitchFoundation extends MDCFoundation<MDCSwitchAdapter> {
   /** The string constants used by the switch. */
   static override get strings() {
@@ -69,8 +71,8 @@ export class MDCSwitchFoundation extends MDCFoundation<MDCSwitchAdapter> {
   }
 
   /** Handles the change event for the switch native control. */
-  handleChange(evt: Event) {
-    const nativeControl = evt.target as HTMLInputElement;
+  handleChange(event: Event) {
+    const nativeControl = event.target as HTMLInputElement;
     this.updateAriaChecked(nativeControl.checked);
     this.updateCheckedStyling(nativeControl.checked);
   }

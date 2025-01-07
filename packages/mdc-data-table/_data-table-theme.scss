@@ -119,11 +119,11 @@ $light-theme: tokens.md-comp-data-table-values();
 
 $_validation-theme: remove-unsupported-keys($light-theme);
 
-$_custom-property-prefix: 'data-table';
+$custom-property-prefix: 'data-table';
 
 @mixin theme($theme) {
   @include theme.validate-theme($_validation-theme, $theme);
-  @include keys.declare-custom-properties($theme, $_custom-property-prefix);
+  @include keys.declare-custom-properties($theme, $custom-property-prefix);
 }
 
 @mixin theme-styles($theme, $query: feature-targeting.all()) {
@@ -132,7 +132,7 @@ $_custom-property-prefix: 'data-table';
   $feat-typography: feature-targeting.create-target($query, typography);
 
   @include theme.validate-theme-styles($_validation-theme, $theme);
-  $theme: keys.create-theme-properties($theme, $_custom-property-prefix);
+  $theme: keys.create-theme-properties($theme, $custom-property-prefix);
 
   ///////////
   // Table //
@@ -401,7 +401,7 @@ $_custom-property-prefix: 'data-table';
     }
   }
 
-  .mdc-data-table__row:last-child .mdc-data-table__cell {
+  .mdc-data-table__row:last-child > .mdc-data-table__cell {
     @include feature-targeting.targets($feat-structure) {
       border-bottom: none;
     }
@@ -507,7 +507,7 @@ $_custom-property-prefix: 'data-table';
 
   &.mdc-data-table--without-footer
     .mdc-data-table__row:last-child
-    .mdc-data-table__cell:first-child {
+    > .mdc-data-table__cell:first-child {
     @include feature-targeting.targets($feat-structure) {
       @include theme.property(border-bottom-left-radius, $bottom-left-radius);
 
@@ -524,7 +524,7 @@ $_custom-property-prefix: 'data-table';
 
   &.mdc-data-table--without-footer
     .mdc-data-table__row:last-child
-    .mdc-data-table__cell:last-child {
+    > .mdc-data-table__cell:last-child {
     @include feature-targeting.targets($feat-structure) {
       @include theme.property(border-bottom-right-radius, $bottom-right-radius);
 

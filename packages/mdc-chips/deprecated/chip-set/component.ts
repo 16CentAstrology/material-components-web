@@ -23,43 +23,47 @@
 
 import {MDCComponent} from '@material/base/component';
 import {announce} from '@material/dom/announce';
+
 import {MDCChip, MDCChipFactory} from '../chip/component';
 import {MDCChipFoundation} from '../chip/foundation';
-import {MDCChipInteractionEvent, MDCChipNavigationEvent, MDCChipRemovalEvent,
-    MDCChipSelectionEvent} from '../chip/types';
+import {MDCChipInteractionEvent, MDCChipNavigationEvent, MDCChipRemovalEvent, MDCChipSelectionEvent} from '../chip/types';
+
 import {MDCChipSetAdapter} from './adapter';
 import {MDCChipSetFoundation} from './foundation';
 
-const {INTERACTION_EVENT, SELECTION_EVENT, REMOVAL_EVENT, NAVIGATION_EVENT} = MDCChipFoundation.strings;
+const {INTERACTION_EVENT, SELECTION_EVENT, REMOVAL_EVENT, NAVIGATION_EVENT} =
+    MDCChipFoundation.strings;
 const {CHIP_SELECTOR} = MDCChipSetFoundation.strings;
 
 let idCounter = 0;
 
+/** MDC Chip Set */
 export class MDCChipSet extends MDCComponent<MDCChipSetFoundation> {
-  static override attachTo(root: Element) {
+  static override attachTo(root: HTMLElement) {
     return new MDCChipSet(root);
   }
 
-  get chips(): ReadonlyArray<MDCChip> {
+  get chips(): readonly MDCChip[] {
     return this.chipsList.slice();
   }
 
   /**
    * @return An array of the IDs of all selected chips.
    */
-  get selectedChipIds(): ReadonlyArray<string> {
+  get selectedChipIds(): readonly string[] {
     return this.foundation.getSelectedChipIds();
   }
 
-  private chipsList!: MDCChip[];                   // assigned in initialize()
-  private chipFactory!: (el: Element) => MDCChip;  // assigned in initialize()
-  private handleChipInteraction!: (evt: MDCChipInteractionEvent) =>
+  private chipsList!: MDCChip[];  // assigned in initialize()
+  private chipFactory!:
+      (el: HTMLElement) => MDCChip;  // assigned in initialize()
+  private handleChipInteraction!: (event: MDCChipInteractionEvent) =>
       void;  // assigned in initialSyncWithDOM()
   private handleChipSelection!:
-      (evt: MDCChipSelectionEvent) => void;  // assigned in initialSyncWithDOM()
+      (event: MDCChipSelectionEvent) => void;  // assigned in initialSyncWithDOM()
   private handleChipRemoval!:
-      (evt: MDCChipRemovalEvent) => void;  // assigned in initialSyncWithDOM()
-  private handleChipNavigation!: (evt: MDCChipNavigationEvent) =>
+      (event: MDCChipRemovalEvent) => void;  // assigned in initialSyncWithDOM()
+  private handleChipNavigation!: (event: MDCChipNavigationEvent) =>
       void;  // assigned in initialSyncWithDOM()
 
   /**
@@ -77,14 +81,18 @@ export class MDCChipSet extends MDCComponent<MDCChipSetFoundation> {
       }
     }
 
-    this.handleChipInteraction = (evt) =>
-        this.foundation.handleChipInteraction(evt.detail);
-    this.handleChipSelection = (evt) =>
-        this.foundation.handleChipSelection(evt.detail);
-    this.handleChipRemoval = (evt) =>
-        this.foundation.handleChipRemoval(evt.detail);
-    this.handleChipNavigation = (evt) =>
-        this.foundation.handleChipNavigation(evt.detail);
+    this.handleChipInteraction = (event) => {
+      this.foundation.handleChipInteraction(event.detail);
+    };
+    this.handleChipSelection = (event) => {
+      this.foundation.handleChipSelection(event.detail);
+    };
+    this.handleChipRemoval = (event) => {
+      this.foundation.handleChipRemoval(event.detail);
+    };
+    this.handleChipNavigation = (event) => {
+      this.foundation.handleChipNavigation(event.detail);
+    };
     this.listen(INTERACTION_EVENT, this.handleChipInteraction);
     this.listen(SELECTION_EVENT, this.handleChipSelection);
     this.listen(REMOVAL_EVENT, this.handleChipRemoval);
@@ -107,14 +115,15 @@ export class MDCChipSet extends MDCComponent<MDCChipSetFoundation> {
   /**
    * Adds a new chip object to the chip set from the given chip element.
    */
-  addChip(chipEl: Element) {
+  addChip(chipEl: HTMLElement) {
     chipEl.id = chipEl.id || `mdc-chip-${++idCounter}`;
     this.chipsList.push(this.chipFactory(chipEl));
   }
 
   override getDefaultFoundation() {
-    // DO NOT INLINE this variable. For backward compatibility, foundations take a Partial<MDCFooAdapter>.
-    // To ensure we don't accidentally omit any methods, we need a separate, strongly typed adapter variable.
+    // DO NOT INLINE this variable. For backward compatibility, foundations take
+    // a Partial<MDCFooAdapter>. To ensure we don't accidentally omit any
+    // methods, we need a separate, strongly typed adapter variable.
     const adapter: MDCChipSetAdapter = {
       announceMessage: (message) => {
         announce(message);
@@ -156,8 +165,8 @@ export class MDCChipSet extends MDCComponent<MDCChipSetFoundation> {
    * Instantiates chip components on all of the chip set's child chip elements.
    */
   private instantiateChips(chipFactory: MDCChipFactory): MDCChip[] {
-    const chipElements: Element[] =
-        [].slice.call(this.root.querySelectorAll(CHIP_SELECTOR));
+    const chipElements =
+        Array.from(this.root.querySelectorAll<HTMLElement>(CHIP_SELECTOR));
     return chipElements.map((el) => {
       el.id = el.id || `mdc-chip-${++idCounter}`;
       return chipFactory(el);
@@ -165,7 +174,8 @@ export class MDCChipSet extends MDCComponent<MDCChipSetFoundation> {
   }
 
   /**
-   * Returns the index of the chip with the given id, or -1 if the chip does not exist.
+   * Returns the index of the chip with the given id, or -1 if the chip does not
+   * exist.
    */
   private findChipIndex(chipId: string): number {
     for (let i = 0; i < this.chips.length; i++) {

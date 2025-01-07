@@ -27,6 +27,7 @@ import {isNavigationEvent, KEY, normalizeKey} from '@material/dom/keyboard';
 import {MDCChipTrailingActionAdapter} from './adapter';
 import {InteractionTrigger, strings} from './constants';
 
+/** MDC Chip Trailing Action Foundation */
 export class MDCChipTrailingActionFoundation extends
     MDCFoundation<MDCChipTrailingActionAdapter> {
   static override get strings() {
@@ -47,21 +48,21 @@ export class MDCChipTrailingActionFoundation extends
     super({...MDCChipTrailingActionFoundation.defaultAdapter, ...adapter});
   }
 
-  handleClick(evt: MouseEvent) {
-    evt.stopPropagation();
+  handleClick(event: MouseEvent) {
+    event.stopPropagation();
     this.adapter.notifyInteraction(InteractionTrigger.CLICK);
   }
 
-  handleKeydown(evt: KeyboardEvent) {
-    evt.stopPropagation();
-    const key = normalizeKey(evt);
+  handleKeydown(event: KeyboardEvent) {
+    event.stopPropagation();
+    const key = normalizeKey(event);
     if (this.shouldNotifyInteractionFromKey(key)) {
       const trigger = this.getTriggerFromKey(key);
       this.adapter.notifyInteraction(trigger);
       return;
     }
 
-    if (isNavigationEvent(evt)) {
+    if (isNavigationEvent(event)) {
       this.adapter.notifyNavigation(key);
       return;
     }

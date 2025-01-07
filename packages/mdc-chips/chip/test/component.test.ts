@@ -21,6 +21,7 @@
  * THE SOFTWARE.
  */
 
+import {createFixture, html} from '../../../../testing/dom';
 import {createKeyboardEvent, emitEvent} from '../../../../testing/dom/events';
 import {setUpMdcTestEnvironment} from '../../../../testing/helpers/setup';
 import {MDCChipActionFocusBehavior, MDCChipActionType} from '../../action/constants';
@@ -51,16 +52,11 @@ function actionFixture(
 }
 
 function getFixture({primary, trailing, id}: TestOptions): HTMLElement {
-  const wrapper = document.createElement('div');
-  wrapper.innerHTML = `
-  <div>
+  return createFixture(html`
+  <div id="${id}">
     ${actionFixture(primary)}
     ${trailing === undefined ? '' : actionFixture(trailing, true)}
-  </div>`;
-  const el = wrapper.firstElementChild as HTMLElement;
-  el.id = id;
-  wrapper.removeChild(el);
-  return el;
+  </div>`);
 }
 
 function setupTest(options: TestOptions) {
@@ -88,7 +84,8 @@ describe('MDCChipAction', () => {
       id: 'c0',
     });
 
-    const primaryActionEl = root.querySelector('.mdc-evolution-chip__action')!;
+    const primaryActionEl =
+        root.querySelector<HTMLElement>('.mdc-evolution-chip__action')!;
     const interactionHandler = jasmine.createSpy('emitInteractionHandler');
     component.listen(MDCChipEvents.INTERACTION, interactionHandler);
     emitEvent(primaryActionEl, 'click', {
@@ -114,7 +111,8 @@ describe('MDCChipAction', () => {
     });
     component.destroy();
 
-    const primaryActionEl = root.querySelector('.mdc-evolution-chip__action')!;
+    const primaryActionEl =
+        root.querySelector<HTMLElement>('.mdc-evolution-chip__action')!;
     const interactionHandler = jasmine.createSpy('emitInteractionHandler');
     component.listen(MDCChipEvents.INTERACTION, interactionHandler);
     emitEvent(primaryActionEl, 'click', {
@@ -191,9 +189,10 @@ describe('MDCChipAction', () => {
       id: 'c0',
     });
 
-    component.setActionFocus(MDCChipActionType.PRIMARY, MDCChipActionFocusBehavior.FOCUSABLE);
-    expect(root.querySelector('.mdc-evolution-chip__action')!.getAttribute(
-               'tabindex'))
+    component.setActionFocus(
+        MDCChipActionType.PRIMARY, MDCChipActionFocusBehavior.FOCUSABLE);
+    expect(root.querySelector<HTMLElement>(
+                   '.mdc-evolution-chip__action')!.getAttribute('tabindex'))
         .toBe('0');
   });
 
@@ -204,8 +203,9 @@ describe('MDCChipAction', () => {
     });
 
     component.setActionSelected(MDCChipActionType.PRIMARY, true);
-    expect(root.querySelector('.mdc-evolution-chip__action')!.getAttribute(
-               'aria-selected'))
+    expect(
+        root.querySelector<HTMLElement>(
+                '.mdc-evolution-chip__action')!.getAttribute('aria-selected'))
         .toBe('true');
   });
 
@@ -272,6 +272,6 @@ describe('MDCChipAction', () => {
     });
 
     component.startAnimation(MDCChipAnimation.ENTER);
-    expect(root.classList.contains(MDCChipCssClasses.ENTER)).toBeTrue();
+    expect(root).toHaveClass(MDCChipCssClasses.ENTER);
   });
 });

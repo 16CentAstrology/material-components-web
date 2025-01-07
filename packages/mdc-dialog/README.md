@@ -107,7 +107,8 @@ Alert dialogs interrupt users with urgent information, details, or actions.
       role="alertdialog"
       aria-modal="true"
       aria-labelledby="my-dialog-title"
-      aria-describedby="my-dialog-content">
+      aria-describedby="my-dialog-content"
+      tabindex="-1">
       <div class="mdc-dialog__content" id="my-dialog-content">
         Discard draft?
       </div>
@@ -144,7 +145,8 @@ As simple dialogs are interruptive, they should be used sparingly. Alternatively
       role="alertdialog"
       aria-modal="true"
       aria-labelledby="my-dialog-title"
-      aria-describedby="my-dialog-content">
+      aria-describedby="my-dialog-content"
+      tabindex="-1">
       <!-- Title cannot contain leading whitespace due to mdc-typography-baseline-top() -->
       <h2 class="mdc-dialog__title" id="my-dialog-title"><!--
      -->Choose a Ringtone<!--
@@ -185,7 +187,8 @@ If the user confirms a choice, it’s carried out. Otherwise, the user can dismi
       role="alertdialog"
       aria-modal="true"
       aria-labelledby="my-dialog-title"
-      aria-describedby="my-dialog-content">
+      aria-describedby="my-dialog-content"
+      tabindex="-1">
       <!-- Title cannot contain leading whitespace due to mdc-typography-baseline-top() -->
       <h2 class="mdc-dialog__title" id="my-dialog-title"><!--
      -->Choose a Ringtone<!--
@@ -248,15 +251,17 @@ Full-screen dialogs group a series of tasks, such as creating a calendar entry w
       role="dialog"
       aria-modal="true"
       aria-labelledby="my-dialog-title"
-      aria-describedby="my-dialog-content">
+      aria-describedby="my-dialog-content"
+      tabindex="-1">
       <div class="mdc-dialog__header">
         <h2 class="mdc-dialog__title" id="my-dialog-title">
           Full-Screen Dialog Title
         </h2>
-        <button class="mdc-icon-button material-icons mdc-dialog__close"
-                data-mdc-dialog-action="close">
-          close
-        </button>
+        <div class="mdc-dialog__close-tooltip-wrapper">
+          <button class="mdc-icon-button material-icons mdc-dialog__close" data-mdc-dialog-action="close">
+            close
+          </button>
+        </div>
       </div>
       <div class="mdc-dialog__content" id="my-dialog-content">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit.
@@ -303,10 +308,12 @@ absolutely positioned. Sheet content can have no default padding by using the
      id="test-dialog">
   <div class="mdc-dialog__scrim" data-mdc-dialog-action="cancel"></div>
   <div class="mdc-dialog__container">
-    <div class="mdc-dialog__surface">
-      <button class="mdc-icon-button material-icons mdc-dialog__close" data-mdc-dialog-action="close">
-        close
-      </button>
+    <div class="mdc-dialog__surface" tabindex="-1">
+      <div class="mdc-dialog__close-tooltip-wrapper">
+        <button class="mdc-icon-button material-icons mdc-dialog__close" data-mdc-dialog-action="close">
+          close
+        </button>
+      </div>
       <div class="mdc-dialog__content test-dialog__content">
         <div class="test-sheet__content">
           <h3>Sheets</h3>

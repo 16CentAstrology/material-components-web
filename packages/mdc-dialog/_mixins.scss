@@ -112,7 +112,6 @@
       justify-content: space-around; // Ensure Safari centers the dialog (because it treats the container's width oddly)
       box-sizing: border-box;
       height: 100%;
-      transform: scale(0.8);
       opacity: 0;
       // This element is necessary for IE 11 and needs to have `height: 100%`.
       // Let clicks on element fall through to scrim element underneath.
@@ -135,6 +134,9 @@
       pointer-events: auto; // Override from `.mdc-dialog__container`.
       // IE 11: Otherwise, scrolling content in `mdc-dialog__content` overflows.
       overflow-y: auto;
+      outline: 0;
+      // Dialog scales up as it opens.
+      transform: scale(0.8);
 
       @include rtl.rtl {
         @include rtl.ignore-next-line();
@@ -227,7 +229,7 @@
       }
     }
 
-    .mdc-dialog__close {
+    .mdc-dialog__close-tooltip-wrapper {
       @include feature-targeting.targets($feat-structure) {
         top: 5px;
       }
@@ -251,13 +253,13 @@
 
   // Needed so that close affordance is aligned as if there was a title.
   .mdc-dialog--fullscreen--titleless {
-    .mdc-dialog__close {
+    .mdc-dialog__close-tooltip-wrapper {
       @include feature-targeting.targets($feat-structure) {
         margin-top: 4px;
       }
     }
 
-    &.mdc-dialog--scrollable .mdc-dialog__close {
+    &.mdc-dialog--scrollable .mdc-dialog__close-tooltip-wrapper {
       @include feature-targeting.targets($feat-structure) {
         margin-top: 0;
       }
@@ -393,7 +395,8 @@
 
     .mdc-dialog__container {
       @include feature-targeting.targets($feat-animation) {
-        transition: opacity 75ms linear,
+        transition:
+          opacity 75ms linear,
           animation-functions.enter(transform, 150ms);
       }
     }
@@ -409,9 +412,25 @@
 
     .mdc-dialog__container {
       @include feature-targeting.targets($feat-structure) {
+        transform: none;
+      }
+    }
+
+    .mdc-dialog__surface {
+      @include feature-targeting.targets($feat-structure) {
         // Dialog container scales up while opening, but should remain scaled up while closing
         transform: none;
       }
+    }
+  }
+
+  // Override the above transitions when chaining dialogs.
+  .mdc-dialog--chaining .mdc-dialog__scrim {
+    @include feature-targeting.targets($feat-animation) {
+      transition: none;
+    }
+    @include feature-targeting.targets($feat-structure) {
+      opacity: 1;
     }
   }
 
@@ -424,8 +443,13 @@
 
     .mdc-dialog__container {
       @include feature-targeting.targets($feat-structure) {
-        transform: none;
         opacity: 1;
+      }
+    }
+
+    .mdc-dialog__surface {
+      @include feature-targeting.targets($feat-structure) {
+        transform: none;
       }
     }
 
@@ -491,7 +515,7 @@
   }
 
   .mdc-dialog--sheet {
-    .mdc-dialog__close {
+    .mdc-dialog__container .mdc-dialog__close-tooltip-wrapper {
       @include feature-targeting.targets($feat-structure) {
         right: variables.$sheet-close-icon-right;
         top: variables.$sheet-close-icon-top;
@@ -561,7 +585,7 @@
 
   .mdc-dialog__surface {
     @include feature-targeting.targets($feat-color) {
-      @include theme.prop(background-color, $color);
+      @include theme.property(background-color, $color);
     }
   }
 }
@@ -1027,7 +1051,8 @@
 /// @param  {Number} $title-side-padding - Space between the edge of the close
 ///   icon button and edge of the title.
 @mixin _fullscreen-header($close-icon-padding, $title-side-padding) {
-  .mdc-dialog__close {
+  .mdc-dialog__close-tooltip-wrapper {
+    position: relative;
     order: -1;
     @include theme.property(left, -#{$close-icon-padding});
   }
@@ -1048,7 +1073,8 @@
 /// Defines styles for the header bar when a dialog is modal.
 /// @param  {Number} $close-icon-padding - Padding on close icon button.
 @mixin _modal-header($close-icon-padding) {
-  .mdc-dialog__close {
+  .mdc-dialog__close-tooltip-wrapper {
+    position: relative;
     @include theme.property(right, -#{$close-icon-padding});
   }
 }

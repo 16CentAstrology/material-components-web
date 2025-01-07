@@ -42,12 +42,14 @@ import {MDCTextFieldHelperTextFoundation} from './helper-text/foundation';
 import {MDCTextFieldIcon, MDCTextFieldIconFactory} from './icon/component';
 import {MDCTextFieldFoundationMap} from './types';
 
-export class MDCTextField extends MDCComponent<MDCTextFieldFoundation> implements MDCRippleCapableSurface {
-  static override attachTo(root: Element): MDCTextField {
+/** MDC Text Field */
+export class MDCTextField extends
+    MDCComponent<MDCTextFieldFoundation> implements MDCRippleCapableSurface {
+  static override attachTo(root: HTMLElement): MDCTextField {
     return new MDCTextField(root);
   }
 
-  ripple!: MDCRipple | null; // assigned in initialize()
+  ripple!: MDCRipple|null;  // assigned in initialize()
 
   // The only required sub-element.
   private input!: HTMLInputElement;  // assigned in initialize()
@@ -80,47 +82,57 @@ export class MDCTextField extends MDCComponent<MDCTextFieldFoundation> implement
     this.input =
         this.root.querySelector<HTMLInputElement>(strings.INPUT_SELECTOR)!;
 
-    const labelElement = this.root.querySelector(strings.LABEL_SELECTOR);
+    const labelElement =
+        this.root.querySelector<HTMLElement>(strings.LABEL_SELECTOR);
     this.label = labelElement ? labelFactory(labelElement) : null;
 
-    const lineRippleElement = this.root.querySelector(strings.LINE_RIPPLE_SELECTOR);
+    const lineRippleElement =
+        this.root.querySelector<HTMLElement>(strings.LINE_RIPPLE_SELECTOR);
     this.lineRipple =
         lineRippleElement ? lineRippleFactory(lineRippleElement) : null;
 
-    const outlineElement = this.root.querySelector(strings.OUTLINE_SELECTOR);
+    const outlineElement =
+        this.root.querySelector<HTMLElement>(strings.OUTLINE_SELECTOR);
     this.outline = outlineElement ? outlineFactory(outlineElement) : null;
 
     // Helper text
     const helperTextStrings = MDCTextFieldHelperTextFoundation.strings;
     const nextElementSibling = this.root.nextElementSibling;
-    const hasHelperLine = (nextElementSibling && nextElementSibling.classList.contains(cssClasses.HELPER_LINE));
-    const helperTextEl =
-        hasHelperLine && nextElementSibling && nextElementSibling.querySelector(helperTextStrings.ROOT_SELECTOR);
+    const hasHelperLine =
+        (nextElementSibling &&
+         nextElementSibling.classList.contains(cssClasses.HELPER_LINE));
+    const helperTextEl = hasHelperLine && nextElementSibling &&
+        nextElementSibling.querySelector<HTMLElement>(
+            helperTextStrings.ROOT_SELECTOR);
     this.helperText = helperTextEl ? helperTextFactory(helperTextEl) : null;
 
     // Character counter
-    const characterCounterStrings = MDCTextFieldCharacterCounterFoundation.strings;
-    let characterCounterEl = this.root.querySelector(characterCounterStrings.ROOT_SELECTOR);
-    // If character counter is not found in root element search in sibling element.
+    const characterCounterStrings =
+        MDCTextFieldCharacterCounterFoundation.strings;
+    let characterCounterEl = this.root.querySelector<HTMLElement>(
+        characterCounterStrings.ROOT_SELECTOR);
+    // If character counter is not found in root element search in sibling
+    // element.
     if (!characterCounterEl && hasHelperLine && nextElementSibling) {
-      characterCounterEl = nextElementSibling.querySelector(characterCounterStrings.ROOT_SELECTOR);
+      characterCounterEl = nextElementSibling.querySelector<HTMLElement>(
+          characterCounterStrings.ROOT_SELECTOR);
     }
     this.characterCounter =
         characterCounterEl ? characterCounterFactory(characterCounterEl) : null;
 
     // Leading icon
     const leadingIconEl =
-        this.root.querySelector(strings.LEADING_ICON_SELECTOR);
+        this.root.querySelector<HTMLElement>(strings.LEADING_ICON_SELECTOR);
     this.leadingIcon = leadingIconEl ? iconFactory(leadingIconEl) : null;
 
     // Trailing icon
     const trailingIconEl =
-        this.root.querySelector(strings.TRAILING_ICON_SELECTOR);
+        this.root.querySelector<HTMLElement>(strings.TRAILING_ICON_SELECTOR);
     this.trailingIcon = trailingIconEl ? iconFactory(trailingIconEl) : null;
 
     // Prefix and Suffix
-    this.prefix = this.root.querySelector(strings.PREFIX_SELECTOR);
-    this.suffix = this.root.querySelector(strings.SUFFIX_SELECTOR);
+    this.prefix = this.root.querySelector<HTMLElement>(strings.PREFIX_SELECTOR);
+    this.suffix = this.root.querySelector<HTMLElement>(strings.SUFFIX_SELECTOR);
 
     this.ripple = this.createRipple(rippleFactory);
   }
@@ -312,8 +324,10 @@ export class MDCTextField extends MDCComponent<MDCTextFieldFoundation> implement
   }
 
   /**
-   * Enables or disables the use of native validation. Use this for custom validation.
-   * @param useNativeValidation Set this to false to ignore native input validation.
+   * Enables or disables the use of native validation. Use this for custom
+   * validation.
+   * @param useNativeValidation Set this to false to ignore native input
+   *     validation.
    */
   set useNativeValidation(useNativeValidation: boolean) {
     this.foundation.setUseNativeValidation(useNativeValidation);
@@ -367,8 +381,9 @@ export class MDCTextField extends MDCComponent<MDCTextFieldFoundation> implement
   }
 
   override getDefaultFoundation() {
-    // DO NOT INLINE this variable. For backward compatibility, foundations take a Partial<MDCFooAdapter>.
-    // To ensure we don't accidentally omit any methods, we need a separate, strongly typed adapter variable.
+    // DO NOT INLINE this variable. For backward compatibility, foundations take
+    // a Partial<MDCFooAdapter>. To ensure we don't accidentally omit any
+    // methods, we need a separate, strongly typed adapter variable.
     // tslint:disable:object-literal-sort-keys Methods should be in the same order as the adapter interface.
     const adapter: MDCTextFieldAdapter = {
       ...this.getRootAdapterMethods(),
@@ -384,22 +399,28 @@ export class MDCTextField extends MDCComponent<MDCTextFieldFoundation> implement
   private getRootAdapterMethods(): MDCTextFieldRootAdapter {
     // tslint:disable:object-literal-sort-keys Methods should be in the same order as the adapter interface.
     return {
-      addClass: (className) => this.root.classList.add(className),
-      removeClass: (className) => this.root.classList.remove(className),
-      hasClass: (className) => this.root.classList.contains(className),
-      registerTextFieldInteractionHandler: (evtType, handler) => {
-        this.listen(evtType, handler);
+      addClass: (className) => {
+        this.root.classList.add(className);
       },
-      deregisterTextFieldInteractionHandler: (evtType, handler) => {
-        this.unlisten(evtType, handler);
+      removeClass: (className) => {
+        this.root.classList.remove(className);
+      },
+      hasClass: (className) => this.root.classList.contains(className),
+      registerTextFieldInteractionHandler: (eventType, handler) => {
+        this.listen(eventType, handler);
+      },
+      deregisterTextFieldInteractionHandler: (eventType, handler) => {
+        this.unlisten(eventType, handler);
       },
       registerValidationAttributeChangeHandler: (handler) => {
-        const getAttributesList = (mutationsList: MutationRecord[]): string[] => {
-          return mutationsList
-              .map((mutation) => mutation.attributeName)
-              .filter((attributeName) => attributeName) as string[];
-        };
-        const observer = new MutationObserver((mutationsList) => handler(getAttributesList(mutationsList)));
+        const getAttributesList =
+            (mutationsList: MutationRecord[]): string[] => {
+              return mutationsList.map((mutation) => mutation.attributeName)
+                         .filter((attributeName) => attributeName) as string[];
+            };
+        const observer = new MutationObserver((mutationsList) => {
+          handler(getAttributesList(mutationsList));
+        });
         const config = {attributes: true};
         observer.observe(this.input, config);
         return observer;
@@ -416,17 +437,17 @@ export class MDCTextField extends MDCComponent<MDCTextFieldFoundation> implement
     return {
       getNativeInput: () => this.input,
       setInputAttr: (attr, value) => {
-        this.input.setAttribute(attr, value);
+        this.safeSetAttribute(this.input, attr, value);
       },
       removeInputAttr: (attr) => {
         this.input.removeAttribute(attr);
       },
       isFocused: () => document.activeElement === this.input,
-      registerInputInteractionHandler: (evtType, handler) => {
-        this.input.addEventListener(evtType, handler, applyPassive());
+      registerInputInteractionHandler: (eventType, handler) => {
+        this.input.addEventListener(eventType, handler, applyPassive());
       },
-      deregisterInputInteractionHandler: (evtType, handler) => {
-        this.input.removeEventListener(evtType, handler, applyPassive());
+      deregisterInputInteractionHandler: (eventType, handler) => {
+        this.input.removeEventListener(eventType, handler, applyPassive());
       },
     };
     // tslint:enable:object-literal-sort-keys
@@ -506,17 +527,18 @@ export class MDCTextField extends MDCComponent<MDCTextFieldFoundation> implement
       return null;
     }
 
-    // DO NOT INLINE this variable. For backward compatibility, foundations take a Partial<MDCFooAdapter>.
-    // To ensure we don't accidentally omit any methods, we need a separate, strongly typed adapter variable.
+    // DO NOT INLINE this variable. For backward compatibility, foundations take
+    // a Partial<MDCFooAdapter>. To ensure we don't accidentally omit any
+    // methods, we need a separate, strongly typed adapter variable.
     // tslint:disable:object-literal-sort-keys Methods should be in the same order as the adapter interface.
     const adapter: MDCRippleAdapter = {
       ...MDCRipple.createAdapter(this),
       isSurfaceActive: () => ponyfill.matches(this.input, ':active'),
-      registerInteractionHandler: (evtType, handler) => {
-        this.input.addEventListener(evtType, handler, applyPassive());
+      registerInteractionHandler: (eventType, handler) => {
+        this.input.addEventListener(eventType, handler, applyPassive());
       },
-      deregisterInteractionHandler: (evtType, handler) => {
-        this.input.removeEventListener(evtType, handler, applyPassive());
+      deregisterInteractionHandler: (eventType, handler) => {
+        this.input.removeEventListener(eventType, handler, applyPassive());
       },
     };
     // tslint:enable:object-literal-sort-keys

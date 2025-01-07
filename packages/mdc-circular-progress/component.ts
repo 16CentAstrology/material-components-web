@@ -23,9 +23,11 @@
 
 import {MDCComponent} from '@material/base/component';
 import {MDCProgressIndicator} from '@material/progress-indicator/component';
+
 import {MDCCircularProgressAdapter} from './adapter';
 import {MDCCircularProgressFoundation} from './foundation';
 
+/** MDC Circular Progress */
 export class MDCCircularProgress extends
     MDCComponent<MDCCircularProgressFoundation> implements
         MDCProgressIndicator {
@@ -36,13 +38,13 @@ export class MDCCircularProgress extends
         MDCCircularProgressFoundation.strings.DETERMINATE_CIRCLE_SELECTOR)!;
   }
 
-  static override attachTo(root: Element) {
+  static override attachTo(root: HTMLElement) {
     return new MDCCircularProgress(root);
   }
 
   /**
    * Sets whether the progress indicator is in determinate mode.
-   * @param isDeterminate Whether the indicator should be determinate.
+   * @param value Whether the indicator should be determinate.
    */
   set determinate(value: boolean) {
     this.foundation.setDeterminate(value);
@@ -97,7 +99,7 @@ export class MDCCircularProgress extends
         this.root.removeAttribute(attributeName);
       },
       setAttribute: (attributeName: string, value: string) => {
-        this.root.setAttribute(attributeName, value);
+        this.safeSetAttribute(this.root, attributeName, value);
       },
       setDeterminateCircleAttribute: (attributeName: string, value: string) => {
         this.determinateCircle.setAttribute(attributeName, value);

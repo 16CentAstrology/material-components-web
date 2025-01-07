@@ -23,18 +23,18 @@
 
 import {MDCRipple} from '../../../mdc-ripple/component';
 import {supportsCssVariables} from '../../../mdc-ripple/util';
-import {MDCSwitch} from '../component';
-import {strings} from '../constants';
-import {MDCSwitchFoundation} from '../foundation';
+import {createFixture, html} from '../../../../testing/dom';
 import {emitEvent} from '../../../../testing/dom/events';
 import {createMockFoundation} from '../../../../testing/helpers/foundation';
 import {setUpMdcTestEnvironment} from '../../../../testing/helpers/setup';
+import {MDCSwitch} from '../component';
+import {strings} from '../constants';
+import {MDCSwitchFoundation} from '../foundation';
 
 const {NATIVE_CONTROL_SELECTOR, RIPPLE_SURFACE_SELECTOR} = strings;
 
-function getFixture(): Element {
-  const wrapper = document.createElement('div');
-  wrapper.innerHTML = `
+function getFixture(): HTMLElement {
+  return createFixture(html`
     <div class="mdc-switch">
       <div class="mdc-switch__track"></div>
       <div class="mdc-switch__thumb-underlay">
@@ -43,16 +43,14 @@ function getFixture(): Element {
         </div>
       </div>
     </div>
-  `;
-  const el = wrapper.firstElementChild as Element;
-  wrapper.removeChild(el);
-  return el;
+  `);
 }
 
 function setupTest() {
   const root = getFixture();
   const component = new MDCSwitch(root);
-  const rippleSurface = root.querySelector(RIPPLE_SURFACE_SELECTOR);
+  const rippleSurface =
+      root.querySelector<HTMLElement>(RIPPLE_SURFACE_SELECTOR);
   return {root, component, rippleSurface};
 }
 
@@ -60,16 +58,14 @@ describe('MDCSwitch', () => {
   setUpMdcTestEnvironment();
 
   it('attachTo initializes and returns a MDCSwitch instance', () => {
-    expect(MDCSwitch.attachTo(getFixture() as HTMLElement) instanceof MDCSwitch)
-        .toBeTruthy();
+    expect(MDCSwitch.attachTo(getFixture()) instanceof MDCSwitch).toBeTruthy();
   });
 
   if (supportsCssVariables(window)) {
     it('#constructor initializes the root element with a ripple', () => {
       const {rippleSurface} = setupTest();
       jasmine.clock().tick(1);
-      expect(rippleSurface!.classList.contains('mdc-ripple-upgraded'))
-          .toBeTruthy();
+      expect(rippleSurface).toHaveClass('mdc-ripple-upgraded');
     });
 
     it('#destroy removes the ripple', () => {
@@ -77,8 +73,7 @@ describe('MDCSwitch', () => {
       jasmine.clock().tick(1);
       component.destroy();
       jasmine.clock().tick(1);
-      expect(rippleSurface!.classList.contains('mdc-ripple-upgraded'))
-          .toBeFalsy();
+      expect(rippleSurface).not.toHaveClass('mdc-ripple-upgraded');
     });
   }
 
@@ -86,7 +81,7 @@ describe('MDCSwitch', () => {
      () => {
        const {root, component} = setupTest();
        const inputEl =
-           root.querySelector(NATIVE_CONTROL_SELECTOR) as HTMLInputElement;
+           root.querySelector<HTMLInputElement>(NATIVE_CONTROL_SELECTOR)!;
        component.checked = true;
        expect(inputEl.checked).toBeTruthy();
        expect(component.checked).toEqual(inputEl.checked);
@@ -95,18 +90,16 @@ describe('MDCSwitch', () => {
   it('get/set checked updates the component styles', () => {
     const {root, component} = setupTest();
     component.checked = true;
-    expect(root.classList.contains(MDCSwitchFoundation.cssClasses.CHECKED))
-        .toBeTruthy();
+    expect(root).toHaveClass(MDCSwitchFoundation.cssClasses.CHECKED);
     component.checked = false;
-    expect(root.classList.contains(MDCSwitchFoundation.cssClasses.CHECKED))
-        .toBeFalsy();
+    expect(root).not.toHaveClass(MDCSwitchFoundation.cssClasses.CHECKED);
   });
 
   it('get/set disabled updates the disabled value of the native switch input element',
      () => {
        const {root, component} = setupTest();
        const inputEl =
-           root.querySelector(NATIVE_CONTROL_SELECTOR) as HTMLInputElement;
+           root.querySelector<HTMLInputElement>(NATIVE_CONTROL_SELECTOR)!;
        component.disabled = true;
        expect(inputEl.disabled).toBeTruthy();
        expect(component.disabled).toEqual(inputEl.disabled);
@@ -118,17 +111,15 @@ describe('MDCSwitch', () => {
   it('get/set disabled updates the component styles', () => {
     const {root, component} = setupTest();
     component.disabled = true;
-    expect(root.classList.contains(MDCSwitchFoundation.cssClasses.DISABLED))
-        .toBeTruthy();
+    expect(root).toHaveClass(MDCSwitchFoundation.cssClasses.DISABLED);
     component.disabled = false;
-    expect(root.classList.contains(MDCSwitchFoundation.cssClasses.DISABLED))
-        .toBeFalsy();
+    expect(root).not.toHaveClass(MDCSwitchFoundation.cssClasses.DISABLED);
   });
 
   it('get/set checked updates the aria-checked of the native switch input element',
      () => {
        const {root, component} = setupTest();
-       const inputEl = root.querySelector(NATIVE_CONTROL_SELECTOR);
+       const inputEl = root.querySelector<HTMLElement>(NATIVE_CONTROL_SELECTOR);
        component.checked = true;
        expect(
            inputEl!.getAttribute(MDCSwitchFoundation.strings.ARIA_CHECKED_ATTR))
@@ -153,7 +144,7 @@ describe('MDCSwitch', () => {
   it('#initialSyncWithDOM calls foundation.setChecked', () => {
     const root = getFixture();
     const inputEl =
-        root.querySelector(NATIVE_CONTROL_SELECTOR) as HTMLInputElement;
+        root.querySelector<HTMLInputElement>(NATIVE_CONTROL_SELECTOR)!;
     inputEl.checked = true;
     const {mockFoundation} = setupMockFoundationTest(root);
     expect(mockFoundation.setChecked).toHaveBeenCalledWith(true);
@@ -164,7 +155,7 @@ describe('MDCSwitch', () => {
     const {root, mockFoundation} = setupMockFoundationTest();
 
     const inputEl =
-        root.querySelector(NATIVE_CONTROL_SELECTOR) as HTMLInputElement;
+        root.querySelector<HTMLInputElement>(NATIVE_CONTROL_SELECTOR)!;
     emitEvent(inputEl, 'change');
 
     expect(mockFoundation.handleChange).toHaveBeenCalledTimes(1);
@@ -176,7 +167,7 @@ describe('MDCSwitch', () => {
        component.destroy();
 
        const inputEl =
-           root.querySelector(NATIVE_CONTROL_SELECTOR) as HTMLInputElement;
+           root.querySelector<HTMLInputElement>(NATIVE_CONTROL_SELECTOR)!;
        emitEvent(inputEl, 'change');
 
        expect(mockFoundation.handleChange).not.toHaveBeenCalled();

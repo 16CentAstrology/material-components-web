@@ -30,6 +30,7 @@
 @use '@material/feature-targeting/feature-targeting';
 @use '@material/ripple/ripple-theme';
 @use '@material/theme/keys';
+@use '@material/theme/map-ext';
 @use '@material/theme/state';
 @use '@material/theme/theme';
 @use '@material/theme/theme-color';
@@ -83,7 +84,7 @@ $light-theme: (
   label-container-height: null,
   label-label-text-color: $value-indicator-text-color,
   label-label-text-font: typography.get-font(subtitle2),
-  label-label-text-font-size: typography.get-size(subtitle2),
+  label-label-text-size: typography.get-size(subtitle2),
   label-label-text-line-height: typography.get-line-height(subtitle2),
   label-label-text-tracking: typography.get-tracking(subtitle2),
   label-label-text-weight: typography.get-weight(subtitle2),
@@ -189,6 +190,25 @@ $light-theme: (
   .mdc-slider__track--active {
     @include feature-targeting.targets($feat-structure) {
       @include theme.property(height, map.get($theme, 'active-track-height'));
+      @include theme.property(
+        top,
+        // Using 'xactive' because string replace finds 'active' in 'inactive'
+        'calc((inactive-track-height - xactive-track-height) / 2)',
+        $replace: (
+          'inactive-track-height': map.get($theme, 'inactive-track-height'),
+          'xactive-track-height': map.get($theme, 'active-track-height')
+        )
+      );
+    }
+  }
+
+  .mdc-slider__track--active_fill {
+    @include feature-targeting.targets($feat-structure) {
+      // Use border rather than background-color to fill track, for HCM.
+      @include theme.property(
+        border-top-width,
+        map.get($theme, 'active-track-height')
+      );
     }
   }
 
@@ -387,6 +407,10 @@ $light-theme: (
       @include _set-tick-mark-active-color($_disabled-color, $opacity, $query);
     }
   }
+
+  @media (forced-colors: active) {
+    @include _set-tick-mark-active-color(Canvas, 1, $query);
+  }
 }
 
 @mixin _set-tick-mark-active-color($color, $opacity, $query) {
@@ -430,6 +454,10 @@ $light-theme: (
         $query
       );
     }
+  }
+
+  @media (forced-colors: active) {
+    @include _set-tick-mark-inactive-color(CanvasText, 1, $query);
   }
 }
 
@@ -500,7 +528,7 @@ $light-theme: (
 
 @mixin _value-indicator-typography($theme, $query: feature-targeting.all()) {
   $font: map.get($theme, 'label-label-text-font');
-  $size: map.get($theme, 'label-label-text-font-size');
+  $size: map.get($theme, 'label-label-text-size');
   $tracking: map.get($theme, 'label-label-text-tracking');
   $weight: map.get($theme, 'label-label-text-weight');
   $line-height: map.get($theme, 'label-label-text-line-height');
@@ -526,6 +554,10 @@ $light-theme: (
 
   .mdc-slider__track--active {
     @include feature-targeting.targets($query) {
+      // Set border-radius on the outer `track--active` element, and apply
+      // transform: scale(...) to the inner `track--active_fill` element,
+      // such that the track grows/shrinks as needed, but the border-radius
+      // is not affected by the scaling.
       @include theme.property(border-radius, $active-track-radius);
     }
   }

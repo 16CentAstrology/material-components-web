@@ -21,17 +21,19 @@
  * THE SOFTWARE.
  */
 
-import {getFixture} from '../../../testing/dom';
+import {createFixture, html} from '../../../testing/dom';
 import {emitEvent} from '../../../testing/dom/events';
 import {setUpMdcTestEnvironment} from '../../../testing/helpers/setup';
 import {CloseReason, cssClasses, events, numbers, selectors} from '../constants';
 import {MDCBanner} from '../index';
 
 function setupTest(fixture: HTMLElement) {
-  const contentEl = fixture.querySelector(selectors.CONTENT)!;
-  const textEl = fixture.querySelector(selectors.TEXT)!;
-  const primaryActionEl = fixture.querySelector(selectors.PRIMARY_ACTION)!;
-  const secondaryActionEl = fixture.querySelector(selectors.SECONDARY_ACTION)!;
+  const contentEl = fixture.querySelector<HTMLElement>(selectors.CONTENT)!;
+  const textEl = fixture.querySelector<HTMLElement>(selectors.TEXT)!;
+  const primaryActionEl =
+      fixture.querySelector<HTMLElement>(selectors.PRIMARY_ACTION)!;
+  const secondaryActionEl =
+      fixture.querySelector<HTMLElement>(selectors.SECONDARY_ACTION)!;
   const component = new MDCBanner(fixture);
 
   return {
@@ -49,7 +51,7 @@ describe('MDCBanner', () => {
   let fixture: HTMLElement;
 
   beforeEach(() => {
-    fixture = getFixture(`<div>
+    fixture = createFixture(html`<div>
       <div class="mdc-banner" role="banner">
         <div class="mdc-banner__content">
           <div class="mdc-banner__text"
@@ -110,7 +112,7 @@ describe('MDCBanner', () => {
   it('#initialSyncWithDom adds a click event listener on the content element',
      () => {
        const contentEl =
-           fixture.querySelector('.mdc-banner__content') as HTMLElement;
+           fixture.querySelector<HTMLElement>('.mdc-banner__content')!;
        spyOn(contentEl, 'addEventListener').and.callThrough();
        const component = MDCBanner.attachTo(fixture);
 
@@ -150,13 +152,13 @@ describe('MDCBanner', () => {
        component.listen(events.OPENED, openedHandler);
        component.open();
        expect(openingHandler).toHaveBeenCalled();
-       expect(fixture.classList.contains(cssClasses.OPENING)).toBe(true);
-       expect(fixture.classList.contains(cssClasses.CLOSING)).toBe(false);
+       expect(fixture).toHaveClass(cssClasses.OPENING);
+       expect(fixture).not.toHaveClass(cssClasses.CLOSING);
        jasmine.clock().tick(1);
-       expect(fixture.classList.contains(cssClasses.OPEN)).toBe(true);
+       expect(fixture).toHaveClass(cssClasses.OPEN);
        jasmine.clock().tick(numbers.BANNER_ANIMATION_OPEN_TIME_MS);
        expect(openedHandler).toHaveBeenCalled();
-       expect(fixture.classList.contains(cssClasses.OPENING)).toBe(false);
+       expect(fixture).not.toHaveClass(cssClasses.OPENING);
        component.unlisten(events.OPENING, openingHandler);
        component.unlisten(events.OPENED, openedHandler);
      });
@@ -172,12 +174,12 @@ describe('MDCBanner', () => {
        component.listen(events.CLOSED, closedHandler);
        component.close(CloseReason.UNSPECIFIED);
        expect(closingHandler).toHaveBeenCalled();
-       expect(fixture.classList.contains(cssClasses.CLOSING)).toBe(true);
-       expect(fixture.classList.contains(cssClasses.OPEN)).toBe(false);
-       expect(fixture.classList.contains(cssClasses.OPENING)).toBe(false);
+       expect(fixture).toHaveClass(cssClasses.CLOSING);
+       expect(fixture).not.toHaveClass(cssClasses.OPEN);
+       expect(fixture).not.toHaveClass(cssClasses.OPENING);
        jasmine.clock().tick(numbers.BANNER_ANIMATION_CLOSE_TIME_MS);
        expect(closedHandler).toHaveBeenCalled();
-       expect(fixture.classList.contains(cssClasses.CLOSING)).toBe(false);
+       expect(fixture).not.toHaveClass(cssClasses.CLOSING);
        component.unlisten(events.CLOSING, closingHandler);
        component.unlisten(events.CLOSED, closedHandler);
      });
@@ -187,8 +189,7 @@ describe('MDCBanner', () => {
 
     component.open();
     jasmine.clock().tick(1);
-    expect(fixture.offsetHeight)
-        .toEqual((contentEl as HTMLElement).offsetHeight);
+    expect(fixture.offsetHeight).toEqual(contentEl.offsetHeight);
   });
 
   it('#close sets the root element height back to 0', () => {
@@ -203,11 +204,10 @@ describe('MDCBanner', () => {
      () => {
        const {component, contentEl} = setupTest(fixture);
 
-       (contentEl as HTMLElement).style.height = '50px';
+       contentEl.style.height = '50px';
        component.layout();
        jasmine.clock().tick(1);
-       expect(fixture.offsetHeight)
-           .toEqual((contentEl as HTMLElement).offsetHeight);
+       expect(fixture.offsetHeight).toEqual(contentEl.offsetHeight);
      });
 
   it('get isOpen returns true when open', () => {
@@ -258,7 +258,7 @@ describe('MDCBanner', () => {
   });
 
   it('getSecondaryActionText returns null if no secondary action', () => {
-    fixture = getFixture(`<div>
+    fixture = createFixture(html`<div>
       <div class="mdc-banner" role="banner">
         <div class="mdc-banner__content">
           <div class="mdc-banner__text"

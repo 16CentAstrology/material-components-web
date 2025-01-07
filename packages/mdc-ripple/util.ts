@@ -20,19 +20,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
 import {MDCRipplePoint} from './types';
 
 /**
  * Stores result from supportsCssVariables to avoid redundant processing to
  * detect CSS custom variable support.
  */
-let supportsCssVariables_: boolean | undefined;
+let supportsCssVariablesCache: boolean|undefined;
 
-export function supportsCssVariables(windowObj: typeof globalThis, forceRefresh = false): boolean {
+/** Checks if the window supports CSS Variables */
+export function supportsCssVariables(
+    windowObj: typeof globalThis, forceRefresh = false): boolean {
   const {CSS} = windowObj;
-  let supportsCssVars = supportsCssVariables_;
-  if (typeof supportsCssVariables_ === 'boolean' && !forceRefresh) {
-    return supportsCssVariables_;
+  let supportsCssVars = supportsCssVariablesCache;
+  if (typeof supportsCssVariablesCache === 'boolean' && !forceRefresh) {
+    return supportsCssVariablesCache;
   }
 
   const supportsFunctionPresent = CSS && typeof CSS.supports === 'function';
@@ -43,23 +46,23 @@ export function supportsCssVariables(windowObj: typeof globalThis, forceRefresh 
   const explicitlySupportsCssVars = CSS.supports('--css-vars', 'yes');
   // See: https://bugs.webkit.org/show_bug.cgi?id=154669
   // See: README section on Safari
-  const weAreFeatureDetectingSafari10plus = (
-      CSS.supports('(--css-vars: yes)') &&
-      CSS.supports('color', '#00000000')
-  );
+  const weAreFeatureDetectingSafari10plus =
+      (CSS.supports('(--css-vars: yes)') && CSS.supports('color', '#00000000'));
 
   supportsCssVars =
       explicitlySupportsCssVars || weAreFeatureDetectingSafari10plus;
 
   if (!forceRefresh) {
-    supportsCssVariables_ = supportsCssVars;
+    supportsCssVariablesCache = supportsCssVars;
   }
   return supportsCssVars;
 }
 
-export function getNormalizedEventCoords(evt: Event | undefined, pageOffset: MDCRipplePoint, clientRect: DOMRect):
-    MDCRipplePoint {
-  if (!evt) {
+/** Gets the normalized events coordinates */
+export function getNormalizedEventCoords(
+    event: Event|undefined, pageOffset: MDCRipplePoint,
+    clientRect: DOMRect): MDCRipplePoint {
+  if (!event) {
     return {x: 0, y: 0};
   }
   const {x, y} = pageOffset;
@@ -69,12 +72,12 @@ export function getNormalizedEventCoords(evt: Event | undefined, pageOffset: MDC
   let normalizedX;
   let normalizedY;
   // Determine touch point relative to the ripple container.
-  if (evt.type === 'touchstart') {
-    const touchEvent = evt as TouchEvent;
+  if (event.type === 'touchstart') {
+    const touchEvent = event as TouchEvent;
     normalizedX = touchEvent.changedTouches[0].pageX - documentX;
     normalizedY = touchEvent.changedTouches[0].pageY - documentY;
   } else {
-    const mouseEvent = evt as MouseEvent;
+    const mouseEvent = event as MouseEvent;
     normalizedX = mouseEvent.pageX - documentX;
     normalizedY = mouseEvent.pageY - documentY;
   }

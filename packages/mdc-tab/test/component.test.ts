@@ -21,14 +21,14 @@
  * THE SOFTWARE.
  */
 
+import {createFixture, html} from '../../../testing/dom';
 import {emitEvent} from '../../../testing/dom/events';
 import {createMockFoundation} from '../../../testing/helpers/foundation';
 import {setUpMdcTestEnvironment} from '../../../testing/helpers/setup';
 import {MDCTab, MDCTabFoundation} from '../index';
 
-const getFixture = () => {
-  const wrapper = document.createElement('div');
-  wrapper.innerHTML = `
+function getFixture() {
+  return createFixture(html`
   <button class="mdc-tab" aria-selected="false" role="tab">
     <span class="mdc-tab__content">
       <span class="mdc-tab__text-label">Foo</span>
@@ -38,19 +38,16 @@ const getFixture = () => {
     <span class="mdc-tab-indicator">
       <span class="mdc-tab-indicator__content mdc-tab-indicator__content--underline"></span>
     </span>
-  </button>`;
-  const el = wrapper.firstElementChild as HTMLElement;
-  wrapper.removeChild(el);
-  return el;
-};
+  </button>`);
+}
 
 function setupTest({useMockFoundation = false} = {}) {
-  let mockFoundation = useMockFoundation ?
+  const mockFoundation = useMockFoundation ?
       createMockFoundation(MDCTabFoundation) :
       new MDCTabFoundation();
   const root = getFixture();
-  const content = root.querySelector(
-                      MDCTabFoundation.strings.CONTENT_SELECTOR) as HTMLElement;
+  const content = root.querySelector<HTMLElement>(
+      MDCTabFoundation.strings.CONTENT_SELECTOR)!;
   const component = new MDCTab(root, mockFoundation);
   return {root, component, mockFoundation, content};
 }
@@ -86,20 +83,20 @@ describe('MDCTab', () => {
     jasmine.clock().tick(1);
     component.destroy();
     jasmine.clock().tick(1);
-    expect(root.classList.contains('mdc-ripple-upgraded')).toBeFalsy();
+    expect(root).not.toHaveClass('mdc-ripple-upgraded');
   });
 
   it('#adapter.addClass adds a class to the root element', () => {
     const {root, component} = setupTest();
     (component.getDefaultFoundation() as any).adapter.addClass('foo');
-    expect(root.classList.contains('foo')).toBe(true);
+    expect(root).toHaveClass('foo');
   });
 
   it('#adapter.removeClass removes a class to the root element', () => {
     const {root, component} = setupTest();
     root.classList.add('foo');
     (component.getDefaultFoundation() as any).adapter.removeClass('foo');
-    expect(root.classList.contains('foo')).toBe(false);
+    expect(root).not.toHaveClass('foo');
   });
 
   it('#adapter.hasClass returns true if a class exists on the root element',
@@ -107,32 +104,30 @@ describe('MDCTab', () => {
        const {root, component} = setupTest();
        root.classList.add('foo');
        (component.getDefaultFoundation() as any).adapter.hasClass('foo');
-       expect(
-           (component.getDefaultFoundation() as any).adapter.hasClass('foo'))
+       expect((component.getDefaultFoundation() as any).adapter.hasClass('foo'))
            .toBe(true);
      });
 
   it('#adapter.setAttr adds a given attribute to the root element', () => {
     const {root, component} = setupTest();
-    (component.getDefaultFoundation() as any).adapter.setAttr('foo', 'bar');
-    expect(root.getAttribute('foo')).toEqual('bar');
+    (component.getDefaultFoundation() as any)
+        .adapter.setAttr('data-foo', 'bar');
+    expect(root.getAttribute('data-foo')).toEqual('bar');
   });
 
   it('#adapter.activateIndicator activates the indicator subcomponent', () => {
     const {root, component} = setupTest();
     (component.getDefaultFoundation() as any).adapter.activateIndicator();
-    expect((root.querySelector('.mdc-tab-indicator') as Element)
-               .classList.contains('mdc-tab-indicator--active'))
-        .toBeTruthy();
+    expect(root.querySelector<HTMLElement>('.mdc-tab-indicator'))
+        .toHaveClass('mdc-tab-indicator--active');
   });
 
   it('#adapter.deactivateIndicator deactivates the indicator subcomponent',
      () => {
        const {root, component} = setupTest();
        (component.getDefaultFoundation() as any).adapter.deactivateIndicator();
-       expect((root.querySelector('.mdc-tab-indicator') as Element)
-                  .classList.contains('mdc-tab-indicator--active'))
-           .toBeFalsy();
+       expect(root.querySelector<HTMLElement>('.mdc-tab-indicator'))
+           .not.toHaveClass('mdc-tab-indicator--active');
      });
 
   it('#adapter.getOffsetWidth() returns the offsetWidth of the root element',
@@ -148,8 +143,8 @@ describe('MDCTab', () => {
      () => {
        const {root, component} = setupTest();
        expect(
-           (component.getDefaultFoundation() as any)
-               .adapter.getOffsetLeft() === root.offsetLeft)
+           (component.getDefaultFoundation() as any).adapter.getOffsetLeft() ===
+           root.offsetLeft)
            .toBe(true);
      });
 
@@ -178,6 +173,23 @@ describe('MDCTab', () => {
     expect(document.activeElement === root).toBe(true);
     document.body.removeChild(root);
   });
+
+  it('#adapter.isFocused() returns true when the root element is focused',
+     () => {
+       const {root, component} = setupTest();
+       document.body.appendChild(root);
+       (component.getDefaultFoundation() as any).adapter.focus();
+       expect((component.getDefaultFoundation() as any).adapter.isFocused())
+           .toBe(true);
+     });
+
+  it('#adapter.isFocused() returns false when the root element is not focused',
+     () => {
+       const {root, component} = setupTest();
+       document.body.appendChild(root);
+       expect((component.getDefaultFoundation() as any).adapter.isFocused())
+           .toBe(false);
+     });
 
   it(`#adapter.notifyInteracted() emits the ${
          MDCTabFoundation.strings.INTERACTED_EVENT} event`,
@@ -226,8 +238,8 @@ describe('MDCTab', () => {
        const {root, component} = setupTest();
        (component.getDefaultFoundation() as any).adapter.deactivateIndicator();
        expect(component.computeIndicatorClientRect())
-           .toEqual((root.querySelector('.mdc-tab-indicator') as HTMLElement)
-                        .getBoundingClientRect());
+           .toEqual(root.querySelector<HTMLElement>(
+                            '.mdc-tab-indicator')!.getBoundingClientRect());
      });
 
   it('#computeDimensions() calls computeDimensions', () => {

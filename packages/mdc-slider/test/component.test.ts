@@ -21,8 +21,7 @@
  * THE SOFTWARE.
  */
 
-import {getFixture} from '../../../testing/dom';
-import {html} from '../../../testing/dom';
+import {createFixture, html} from '../../../testing/dom';
 import {createMouseEvent, emitEvent} from '../../../testing/dom/events';
 import {setUpMdcTestEnvironment} from '../../../testing/helpers/setup';
 import {attributes, cssClasses, events, MDCSlider, MDCSliderFoundation, Thumb} from '../index';
@@ -290,38 +289,39 @@ describe('MDCSlider', () => {
 
     it('adds tick mark elements on component initialization', () => {
       const tickMarks =
-          root.querySelector(`.${cssClasses.TICK_MARKS_CONTAINER}`)!.children;
+          root.querySelector<HTMLElement>(
+                  `.${cssClasses.TICK_MARKS_CONTAINER}`)!.children;
       expect(tickMarks.length).toBe(11);
       for (let i = 0; i < tickMarks.length; i++) {
         const tickMarkClass = i === 0 ? cssClasses.TICK_MARK_ACTIVE :
                                         cssClasses.TICK_MARK_INACTIVE;
-        expect(tickMarks[i].classList.contains(tickMarkClass)).toBe(true);
+        expect(tickMarks[i]).toHaveClass(tickMarkClass);
       }
     });
 
     it('updates tick mark classes after slider update', () => {
       // Sanity check that tick mark classes are as we expect on component init.
-      let tickMarks =
-          root.querySelector(`.${cssClasses.TICK_MARKS_CONTAINER}`)!.children;
+      let tickMarks = root.querySelector<HTMLElement>(
+                              `.${cssClasses.TICK_MARKS_CONTAINER}`)!.children;
       expect(tickMarks.length).toBe(11);
       for (let i = 0; i < tickMarks.length; i++) {
         const tickMarkClass = i === 0 ? cssClasses.TICK_MARK_ACTIVE :
                                         cssClasses.TICK_MARK_INACTIVE;
-        expect(tickMarks[i].classList.contains(tickMarkClass)).toBe(true);
+        expect(tickMarks[i]).toHaveClass(tickMarkClass);
       }
 
       const downEvent = createEventFrom('pointer', 'down', {clientX: 55.3});
       root.dispatchEvent(downEvent);
       jasmine.clock().tick(1);  // Tick for RAF from slider UI updates.
 
-      tickMarks =
-          root.querySelector(`.${cssClasses.TICK_MARKS_CONTAINER}`)!.children;
+      tickMarks = root.querySelector<HTMLElement>(
+                          `.${cssClasses.TICK_MARKS_CONTAINER}`)!.children;
       expect(tickMarks.length).toBe(11);
       for (let i = 0; i < tickMarks.length; i++) {
         // 55.3 rounds up to 60, since step value is 10.
         const tickMarkClass = i <= 6 ? cssClasses.TICK_MARK_ACTIVE :
                                        cssClasses.TICK_MARK_INACTIVE;
-        expect(tickMarks[i].classList.contains(tickMarkClass)).toBe(true);
+        expect(tickMarks[i]).toHaveClass(tickMarkClass);
       }
     });
   });
@@ -382,15 +382,15 @@ describe('MDCSlider', () => {
 
     it('updates disabled class when setting disabled state', () => {
       ({root, component} = setUpTest());
-      expect(root.classList.contains(cssClasses.DISABLED)).toBe(false);
+      expect(root).not.toHaveClass(cssClasses.DISABLED);
 
       component.setDisabled(true);
       expect(component.getDisabled()).toBe(true);
-      expect(root.classList.contains(cssClasses.DISABLED)).toBe(true);
+      expect(root).toHaveClass(cssClasses.DISABLED);
 
       component.setDisabled(false);
       expect(component.getDisabled()).toBe(false);
-      expect(root.classList.contains(cssClasses.DISABLED)).toBe(false);
+      expect(root).not.toHaveClass(cssClasses.DISABLED);
     });
 
     it('updates input attrs when setting disabled state', () => {
@@ -521,7 +521,7 @@ describe('MDCSlider', () => {
     let root: HTMLElement, thumb: HTMLElement, trackActive: HTMLElement;
 
     beforeEach(() => {
-      root = getFixture(html`
+      root = createFixture(html`
         <div class="mdc-slider mdc-slider--discrete">
           <input class="mdc-slider__input" type="hidden" min="0" max="100"
                         value="70" step="10">
@@ -544,9 +544,9 @@ describe('MDCSlider', () => {
           </div>
         </div>`);
 
-      thumb = root.querySelector(`.${cssClasses.THUMB}`) as HTMLElement;
+      thumb = root.querySelector<HTMLElement>(`.${cssClasses.THUMB}`)!;
       trackActive =
-          root.querySelector(`.${cssClasses.TRACK_ACTIVE}`) as HTMLElement;
+          root.querySelector<HTMLElement>(`.${cssClasses.TRACK_ACTIVE}`)!;
 
       spyOn(root, 'getBoundingClientRect').and.returnValue({
         left: 0,
@@ -646,7 +646,7 @@ function setUpTest(
       </div>` :
                                    '';
 
-  const root = getFixture(html`
+  const root = createFixture(html`
     <div class="mdc-slider ${discreteClass} ${rangeClass} ${tickMarksClass}">
       ${inputStart}
       ${inputEnd}
@@ -666,11 +666,11 @@ function setUpTest(
       root.querySelectorAll<HTMLInputElement>(`.${cssClasses.INPUT}`);
   const startInput = isRange ? inputs[0] : null;
   const endInput = inputs[inputs.length - 1];
-  const thumbs = root.querySelectorAll(`.${cssClasses.THUMB}`);
+  const thumbs = root.querySelectorAll<HTMLElement>(`.${cssClasses.THUMB}`);
   const startThumb = isRange ? thumbs[0] as HTMLElement : null;
   const endThumb = thumbs[thumbs.length - 1] as HTMLElement;
   const trackActive =
-      root.querySelector(`.${cssClasses.TRACK_ACTIVE}`) as HTMLElement;
+      root.querySelector<HTMLElement>(`.${cssClasses.TRACK_ACTIVE}`)!;
 
   spyOn(root, 'getBoundingClientRect').and.returnValue({
     left: 0,
@@ -708,12 +708,7 @@ function createEventFrom(
       if (phase !== 'down') {
         type = phase === 'move' ? 'pointermove' : 'pointerup';
       }
-      // PointerEvent constructor is not supported in IE. Use a MouseEvent in
-      // IE, since PointerEvent inherits from MouseEvent.
-      const isIe = navigator.userAgent.indexOf('MSIE') !== -1 ||
-          navigator.userAgent.indexOf('Trident') !== -1;
-      event = isIe ? createMouseEvent(type, {clientX}) :
-                     new PointerEvent(type, {clientX, pointerId: 1});
+      event = new PointerEvent(type, {clientX, pointerId: 1});
       break;
     case 'mouse':
       type = 'mousedown';

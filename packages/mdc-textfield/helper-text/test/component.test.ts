@@ -22,17 +22,13 @@
  */
 
 
+import {createFixture, html} from '../../../../testing/dom';
 import {MDCTextFieldHelperText} from '../../../mdc-textfield/helper-text/index';
 
 const getFixture = () => {
-  const wrapper = document.createElement('div');
-  wrapper.innerHTML = `
+  return createFixture(html`
   <div class="mdc-textfield__helper-text"></div>
-`;
-
-  const el = wrapper.firstElementChild as HTMLElement;
-  wrapper.removeChild(el);
-  return el;
+`);
 };
 
 describe('MDCTextFieldHelperText', () => {
@@ -52,26 +48,24 @@ describe('MDCTextFieldHelperText', () => {
   it('#adapter.addClass adds a class to the element', () => {
     const {root, component} = setupTest();
     (component.getDefaultFoundation() as any).adapter.addClass('foo');
-    expect(root.classList.contains('foo')).toBe(true);
+    expect(root).toHaveClass('foo');
   });
 
   it('#adapter.removeClass removes a class from the element', () => {
     const {root, component} = setupTest();
     root.classList.add('foo');
     (component.getDefaultFoundation() as any).adapter.removeClass('foo');
-    expect(root.classList.contains('foo')).toBe(false);
+    expect(root).not.toHaveClass('foo');
   });
 
   it('#adapter.hasClass returns whether or not the element contains a certain class',
      () => {
        const {root, component} = setupTest();
        root.classList.add('foo');
-       expect(
-           (component.getDefaultFoundation() as any).adapter.hasClass('foo'))
+       expect((component.getDefaultFoundation() as any).adapter.hasClass('foo'))
            .toBeTruthy();
        root.classList.remove('foo');
-       expect(
-           (component.getDefaultFoundation() as any).adapter.hasClass('foo'))
+       expect((component.getDefaultFoundation() as any).adapter.hasClass('foo'))
            .toBeFalsy();
      });
 

@@ -211,6 +211,8 @@ describe('MDCMenuSurfaceFoundation', () => {
       'getWindowScroll',
       'setPosition',
       'setMaxHeight',
+      'registerWindowEventHandler',
+      'deregisterWindowEventHandler'
     ]);
   });
 
@@ -1025,6 +1027,12 @@ describe('MDCMenuSurfaceFoundation', () => {
       });
 
   testFoundation(
+      '#open registers window resize listener', ({foundation, mockAdapter}) => {
+        foundation.open();
+        expect(mockAdapter.registerWindowEventHandler).toHaveBeenCalled();
+      });
+
+  testFoundation(
       '#close adds the animation class to start an animation',
       ({foundation, mockAdapter}) => {
         (foundation as unknown as WithIsSurfaceOpen).isSurfaceOpen = true;
@@ -1143,6 +1151,14 @@ describe('MDCMenuSurfaceFoundation', () => {
         expect(mockAdapter.restoreFocus).not.toHaveBeenCalled();
       });
 
+  testFoundation(
+      '#close deregisters window resize listener',
+      ({foundation, mockAdapter}) => {
+        foundation.open();
+        foundation.close();
+        expect(mockAdapter.deregisterWindowEventHandler).toHaveBeenCalled();
+      });
+
   it('#isOpen returns true when the menu surface is open', () => {
     const {foundation} = setupTest();
 
@@ -1207,7 +1223,7 @@ describe('MDCMenuSurfaceFoundation', () => {
 
   it('#handleBodyClick event closes the menu surface', () => {
     const {foundation, mockAdapter} = setupTest();
-    const mockEvt = {
+    const mockevent = {
       target: {},
     } as MouseEvent;
 
@@ -1221,7 +1237,7 @@ describe('MDCMenuSurfaceFoundation', () => {
     jasmine.clock().tick(numbers.TRANSITION_OPEN_DURATION);
     jasmine.clock().tick(1);  // Run to frame.
 
-    foundation.handleBodyClick(mockEvt);
+    foundation.handleBodyClick(mockevent);
     jasmine.clock().tick(1);  // Run to frame.
 
     expect(mockAdapter.removeClass).toHaveBeenCalledWith(cssClasses.OPEN);
@@ -1229,7 +1245,7 @@ describe('MDCMenuSurfaceFoundation', () => {
 
   it('on menu surface click does not emit close', () => {
     const {foundation, mockAdapter} = setupTest();
-    const mockEvt = {
+    const mockevent = {
       target: {},
     } as MouseEvent;
     mockAdapter.isElementInContainer.withArgs(jasmine.anything())
@@ -1237,7 +1253,7 @@ describe('MDCMenuSurfaceFoundation', () => {
     foundation.init();
     foundation.open();
     jasmine.clock().tick(1);  // Run to frame.
-    foundation.handleBodyClick(mockEvt);
+    foundation.handleBodyClick(mockevent);
     jasmine.clock().tick(1);  // Run to frame.
     expect(mockAdapter.notifyClose).not.toHaveBeenCalled();
   });

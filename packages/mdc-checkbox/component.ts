@@ -34,17 +34,16 @@ import {MDCCheckboxAdapter} from './adapter';
 import {strings} from './constants';
 import {MDCCheckboxFoundation} from './foundation';
 
-/**
- * This type is needed for compatibility with Closure Compiler.
- */
-type PropertyDescriptorGetter = (() => unknown) | undefined;
-
 const CB_PROTO_PROPS = ['checked', 'indeterminate'];
 
-export type MDCCheckboxFactory = (el: Element, foundation?: MDCCheckboxFoundation) => MDCCheckbox;
+/** MDC Checkbox Factory */
+export type MDCCheckboxFactory =
+    (el: HTMLElement, foundation?: MDCCheckboxFoundation) => MDCCheckbox;
 
-export class MDCCheckbox extends MDCComponent<MDCCheckboxFoundation> implements MDCRippleCapableSurface {
-  static override attachTo(root: Element) {
+/** MDC Checkbox */
+export class MDCCheckbox extends MDCComponent<MDCCheckboxFoundation> implements
+    MDCRippleCapableSurface {
+  static override attachTo(root: HTMLElement) {
     return new MDCCheckbox(root);
   }
 
@@ -120,11 +119,14 @@ export class MDCCheckbox extends MDCComponent<MDCCheckboxFoundation> implements 
   }
 
   override getDefaultFoundation() {
-    // DO NOT INLINE this variable. For backward compatibility, foundations take a Partial<MDCFooAdapter>.
-    // To ensure we don't accidentally omit any methods, we need a separate, strongly typed adapter variable.
+    // DO NOT INLINE this variable. For backward compatibility, foundations take
+    // a Partial<MDCFooAdapter>. To ensure we don't accidentally omit any
+    // methods, we need a separate, strongly typed adapter variable.
     const adapter: MDCCheckboxAdapter = {
-      addClass: (className) => this.root.classList.add(className),
-      forceLayout: () => (this.root as HTMLElement).offsetWidth,
+      addClass: (className) => {
+        this.root.classList.add(className);
+      },
+      forceLayout: () => this.root.offsetWidth,
       hasNativeControl: () => !!this.getNativeControl(),
       isAttachedToDOM: () => Boolean(this.root.parentNode),
       isChecked: () => this.checked,
@@ -136,7 +138,7 @@ export class MDCCheckbox extends MDCComponent<MDCCheckboxFoundation> implements 
         this.getNativeControl().removeAttribute(attr);
       },
       setNativeControlAttr: (attr, value) => {
-        this.getNativeControl().setAttribute(attr, value);
+        this.safeSetAttribute(this.getNativeControl(), attr, value);
       },
       setNativeControlDisabled: (disabled) => {
         this.getNativeControl().disabled = disabled;
@@ -146,19 +148,20 @@ export class MDCCheckbox extends MDCComponent<MDCCheckboxFoundation> implements 
   }
 
   private createRipple(): MDCRipple {
-    // DO NOT INLINE this variable. For backward compatibility, foundations take a Partial<MDCFooAdapter>.
-    // To ensure we don't accidentally omit any methods, we need a separate, strongly typed adapter variable.
+    // DO NOT INLINE this variable. For backward compatibility, foundations take
+    // a Partial<MDCFooAdapter>. To ensure we don't accidentally omit any
+    // methods, we need a separate, strongly typed adapter variable.
     const adapter: MDCRippleAdapter = {
       ...MDCRipple.createAdapter(this),
-      deregisterInteractionHandler: (evtType, handler) => {
+      deregisterInteractionHandler: (eventType, handler) => {
         this.getNativeControl().removeEventListener(
-            evtType, handler, applyPassive());
+            eventType, handler, applyPassive());
       },
       isSurfaceActive: () => matches(this.getNativeControl(), ':active'),
       isUnbounded: () => true,
-      registerInteractionHandler: (evtType, handler) => {
+      registerInteractionHandler: (eventType, handler) => {
         this.getNativeControl().addEventListener(
-            evtType, handler, applyPassive());
+            eventType, handler, applyPassive());
       },
     };
     return new MDCRipple(this.root, new MDCRippleFoundation(adapter));
@@ -170,14 +173,14 @@ export class MDCCheckbox extends MDCComponent<MDCCheckboxFoundation> implements 
 
     for (const controlState of CB_PROTO_PROPS) {
       const desc = Object.getOwnPropertyDescriptor(cbProto, controlState);
-      // We have to check for this descriptor, since some browsers (Safari) don't support its return.
-      // See: https://bugs.webkit.org/show_bug.cgi?id=49739
+      // We have to check for this descriptor, since some browsers (Safari)
+      // don't support its return. See:
+      // https://bugs.webkit.org/show_bug.cgi?id=49739
       if (!validDescriptor(desc)) {
         return;
       }
 
-      // Type cast is needed for compatibility with Closure Compiler.
-      const nativeGetter = (desc as {get: PropertyDescriptorGetter}).get;
+      const nativeGetter = desc.get;
 
       const nativeCbDesc = {
         configurable: desc.configurable,
@@ -210,12 +213,14 @@ export class MDCCheckbox extends MDCComponent<MDCCheckboxFoundation> implements 
     const el =
         this.root.querySelector<HTMLInputElement>(NATIVE_CONTROL_SELECTOR);
     if (!el) {
-      throw new Error(`Checkbox component requires a ${NATIVE_CONTROL_SELECTOR} element`);
+      throw new Error(
+          `Checkbox component requires a ${NATIVE_CONTROL_SELECTOR} element`);
     }
     return el;
   }
 }
 
-function validDescriptor(inputPropDesc: PropertyDescriptor | undefined): inputPropDesc is PropertyDescriptor {
+function validDescriptor(inputPropDesc: PropertyDescriptor|
+                         undefined): inputPropDesc is PropertyDescriptor {
   return !!inputPropDesc && typeof inputPropDesc.set === 'function';
 }

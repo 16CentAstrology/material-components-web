@@ -25,16 +25,21 @@ import {MDCComponent} from '@material/base/component';
 import {SpecificEventListener} from '@material/base/types';
 import {applyPassive} from '@material/dom/events';
 import {matches} from '@material/dom/ponyfill';
+
 import {MDCTabScrollerAdapter} from './adapter';
 import {MDCTabScrollerFoundation} from './foundation';
 import * as util from './util';
 
-type InteractionEventType = 'wheel' | 'touchstart' | 'pointerdown' | 'mousedown' | 'keydown';
+type InteractionEventType =
+    'wheel'|'touchstart'|'pointerdown'|'mousedown'|'keydown';
 
-export type MDCTabScrollerFactory = (el: Element, foundation?: MDCTabScrollerFoundation) => MDCTabScroller;
+/** MDC Tab Scroller Factory */
+export type MDCTabScrollerFactory =
+    (el: HTMLElement, foundation?: MDCTabScrollerFoundation) => MDCTabScroller;
 
+/** MDC Tab Scroller */
 export class MDCTabScroller extends MDCComponent<MDCTabScrollerFoundation> {
-  static override attachTo(root: Element): MDCTabScroller {
+  static override attachTo(root: HTMLElement): MDCTabScroller {
     return new MDCTabScroller(root);
   }
 
@@ -58,8 +63,8 @@ export class MDCTabScroller extends MDCComponent<MDCTabScrollerFoundation> {
     this.handleInteraction = () => {
       this.foundation.handleInteraction();
     };
-    this.handleTransitionEnd = (evt) => {
-      this.foundation.handleTransitionEnd(evt);
+    this.handleTransitionEnd = (event) => {
+      this.foundation.handleTransitionEnd(event);
     };
 
     this.area.addEventListener('wheel', this.handleInteraction, applyPassive());
@@ -91,12 +96,13 @@ export class MDCTabScroller extends MDCComponent<MDCTabScrollerFoundation> {
   }
 
   override getDefaultFoundation() {
-    // DO NOT INLINE this variable. For backward compatibility, foundations take a Partial<MDCFooAdapter>.
-    // To ensure we don't accidentally omit any methods, we need a separate, strongly typed adapter variable.
+    // DO NOT INLINE this variable. For backward compatibility, foundations take
+    // a Partial<MDCFooAdapter>. To ensure we don't accidentally omit any
+    // methods, we need a separate, strongly typed adapter variable.
     // tslint:disable:object-literal-sort-keys Methods should be in the same order as the adapter interface.
     const adapter: MDCTabScrollerAdapter = {
-      eventTargetMatchesSelector: (evtTarget, selector) =>
-          matches(evtTarget as Element, selector),
+      eventTargetMatchesSelector: (eventTarget, selector) =>
+          matches(eventTarget as Element, selector),
       addClass: (className) => {
         this.root.classList.add(className);
       },
@@ -144,7 +150,8 @@ export class MDCTabScroller extends MDCComponent<MDCTabScrollerFoundation> {
 
   /**
    * Increments the scroll value by the given amount
-   * @param scrollXIncrement The pixel value by which to increment the scroll value
+   * @param scrollXIncrement The pixel value by which to increment the scroll
+   *     value
    */
   incrementScroll(scrollXIncrement: number) {
     this.foundation.incrementScroll(scrollXIncrement);

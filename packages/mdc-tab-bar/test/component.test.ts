@@ -22,13 +22,13 @@
  */
 
 import {MDCTab, MDCTabFoundation} from '../../mdc-tab/index';
+import {createFixture, html} from '../../../testing/dom';
 import {emitEvent} from '../../../testing/dom/events';
 import {createMockFoundation} from '../../../testing/helpers/foundation';
 import {MDCTabBar, MDCTabBarFoundation} from '../index';
 
 function getFixture() {
-  const wrapper = document.createElement('div');
-  wrapper.innerHTML = `
+  return createFixture(html`
     <div class="mdc-tab-bar">
       <div class="mdc-tab-scroller">
         <div class="mdc-tab-scroller__scroll-area">
@@ -49,10 +49,7 @@ function getFixture() {
         </div>
       </div>
     </div>
-  `;
-  const el = wrapper.firstElementChild as Element;
-  wrapper.removeChild(el);
-  return el;
+  `);
 }
 
 describe('MDCTabBar', () => {
@@ -129,14 +126,14 @@ describe('MDCTabBar', () => {
     const {component} = setupTest();
 
     component.focusOnActivate = false;
-    (component as any)
-        .tabList.forEach(
-            (tab: MDCTab) => expect(tab.focusOnActivate).toBe(false));
+    (component as any).tabList.forEach((tab: MDCTab) => {
+      expect(tab.focusOnActivate).toBe(false);
+    });
 
     component.focusOnActivate = true;
-    (component as any)
-        .tabList.forEach(
-            (tab: MDCTab) => expect(tab.focusOnActivate).toBe(true));
+    (component as any).tabList.forEach((tab: MDCTab) => {
+      expect(tab.focusOnActivate).toBe(true);
+    });
   });
 
   it('useAutomaticActivation setter calls foundation#setUseAutomaticActivation',
@@ -188,7 +185,7 @@ describe('MDCTabBar', () => {
        const {component, root} = setupTest();
        expect(
            (component.getDefaultFoundation() as any)
-               .adapter.getOffsetWidth() === (root as HTMLElement).offsetWidth)
+               .adapter.getOffsetWidth() === root.offsetWidth)
            .toBe(true);
      });
 
@@ -260,8 +257,8 @@ describe('MDCTabBar', () => {
   it('#adapter.getTabListLength returns the length of the tab list', () => {
     const {component} = setupTest();
     expect(
-        (component.getDefaultFoundation() as any)
-            .adapter.getTabListLength() === 3)
+        (component.getDefaultFoundation() as any).adapter.getTabListLength() ===
+        3)
         .toBe(true);
   });
 
@@ -272,8 +269,7 @@ describe('MDCTabBar', () => {
        const handler = jasmine.createSpy('');
        root.addEventListener(
            MDCTabBarFoundation.strings.TAB_ACTIVATED_EVENT, handler);
-       (component.getDefaultFoundation() as any)
-           .adapter.notifyTabActivated(66);
+       (component.getDefaultFoundation() as any).adapter.notifyTabActivated(66);
        expect(handler).toHaveBeenCalledWith(
            jasmine.objectContaining({detail: {index: 66}}));
      });
@@ -296,8 +292,8 @@ describe('MDCTabBar', () => {
          MDCTabFoundation.strings.INTERACTED_EVENT}, call handleTabInteraction`,
      () => {
        const {root, mockFoundation} = setupMockFoundationTest();
-       const tab = root.querySelector(
-                       MDCTabBarFoundation.strings.TAB_SELECTOR) as HTMLElement;
+       const tab = root.querySelector<HTMLElement>(
+           MDCTabBarFoundation.strings.TAB_SELECTOR)!;
        emitEvent(tab, MDCTabFoundation.strings.INTERACTED_EVENT, {
          bubbles: true,
        });

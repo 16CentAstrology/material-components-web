@@ -21,18 +21,19 @@
  * THE SOFTWARE.
  */
 
+import {getCorrectPropertyName} from '@material/animation/util';
+
+import {createFixture, html} from '../../../testing/dom';
 import {emitEvent} from '../../../testing/dom/events';
 import {createMockFoundation} from '../../../testing/helpers/foundation';
 import {Corner, cssClasses, strings} from '../constants';
 import {MDCMenuSurface, MDCMenuSurfaceFoundation} from '../index';
-import {getCorrectPropertyName} from '@material/animation/util';
 
 function getFixture(open = false, fixedPosition = false) {
   const openClass = open ? 'mdc-menu-surface--open' : '';
   const fixedClass = fixedPosition ? 'mdc-menu-surface--fixed' : '';
 
-  const wrapper = document.createElement('div');
-  wrapper.innerHTML = `
+  return createFixture(html`
     <div class="mdc-menu-surface ${openClass} ${fixedClass}" tabindex="-1">
       <ul class="mdc-deprecated-list" role="menu">
         <li class="mdc-deprecated-list-item" role="menuitem" tabindex="0">Item</a>
@@ -40,21 +41,15 @@ function getFixture(open = false, fixedPosition = false) {
         <li class="mdc-deprecated-list-item" role="menuitem" tabindex="0">Another Item</a>
       </nav>
     </div>
-  `;
-  const el = wrapper.firstElementChild as HTMLElement;
-  wrapper.removeChild(el);
-  return el;
+  `);
 }
 
 function getAnchorFixture(menuFixture: HTMLElement) {
-  const wrapper = document.createElement('div');
-  wrapper.innerHTML = `
+  const anchorEl = createFixture(html`
     <div class="mdc-menu-surface--anchor">
       <button class="mdc-button">Open</button>
     </div>
-  `;
-  const anchorEl = wrapper.firstElementChild as HTMLElement;
-  wrapper.removeChild(anchorEl);
+  `);
 
   anchorEl.appendChild(menuFixture);
   return anchorEl;
@@ -202,14 +197,14 @@ describe('MDCMenuSurface', () => {
   it('setFixedPosition is true', () => {
     const {root, component, mockFoundation} = setupTest();
     component.setFixedPosition(true);
-    expect(root.classList.contains(cssClasses.FIXED)).toBe(true);
+    expect(root).toHaveClass(cssClasses.FIXED);
     expect(mockFoundation.setFixedPosition).toHaveBeenCalledWith(true);
   });
 
   it('setFixedPosition is false', () => {
     const {root, component, mockFoundation} = setupTest();
     component.setFixedPosition(false);
-    expect(root.classList.contains(cssClasses.FIXED)).toBe(false);
+    expect(root).not.toHaveClass(cssClasses.FIXED);
     expect(mockFoundation.setFixedPosition).toHaveBeenCalledWith(false);
   });
 
@@ -250,30 +245,28 @@ describe('MDCMenuSurface', () => {
   it('adapter#addClass adds a class to the root element', () => {
     const {root, component} = setupTest();
     (component.getDefaultFoundation() as any).adapter.addClass('foo');
-    expect(root.classList.contains('foo')).toBe(true);
+    expect(root).toHaveClass('foo');
   });
 
   it('adapter#removeClass removes a class from the root element', () => {
     const {root, component} = setupTest();
     root.classList.add('foo');
     (component.getDefaultFoundation() as any).adapter.removeClass('foo');
-    expect(root.classList.contains('foo')).toBe(false);
+    expect(root).not.toHaveClass('foo');
   });
 
   it('adapter#hasClass returns true if the root element has specified class',
      () => {
        const {root, component} = setupTest();
        root.classList.add('foo');
-       expect(
-           (component.getDefaultFoundation() as any).adapter.hasClass('foo'))
+       expect((component.getDefaultFoundation() as any).adapter.hasClass('foo'))
            .toBe(true);
      });
 
   it('adapter#hasClass returns false if the root element does not have specified class',
      () => {
        const {component} = setupTest();
-       expect(
-           (component.getDefaultFoundation() as any).adapter.hasClass('foo'))
+       expect((component.getDefaultFoundation() as any).adapter.hasClass('foo'))
            .toBe(false);
      });
 
@@ -572,5 +565,29 @@ describe('MDCMenuSurface', () => {
        const {root, component} = setupTest();
        (component.getDefaultFoundation() as any).adapter.setMaxHeight('100px');
        expect(root.style.maxHeight).toEqual('100px');
+     });
+
+  it('adapter#registerWindowEventHandler uses the handler as a window resize listener',
+     () => {
+       const {component} = setupTest();
+       const handler = jasmine.createSpy('resizeListener');
+       (component.getDefaultFoundation() as any)
+           .adapter.registerWindowEventHandler('resize', handler);
+       emitEvent(window, 'resize');
+       expect(handler).toHaveBeenCalledWith(jasmine.anything());
+       window.removeEventListener('resize', handler);
+     });
+
+  it('adapter#deregisterWindowEventHandler unlistens the handler for window resize',
+     () => {
+       const {component} = setupTest();
+       const handler = jasmine.createSpy('resizeListener');
+       window.addEventListener('resize', handler);
+       (component.getDefaultFoundation() as any)
+           .adapter.deregisterWindowEventHandler('resize', handler);
+       emitEvent(window, 'resize');
+       expect(handler).not.toHaveBeenCalledWith(jasmine.anything());
+       // Just to be safe
+       window.removeEventListener('resize', handler);
      });
 });

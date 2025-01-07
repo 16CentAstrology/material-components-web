@@ -31,6 +31,7 @@ import {MDCSelectHelperTextFoundation} from './helper-text/foundation';
 import {MDCSelectIconFoundation} from './icon/foundation';
 import {MDCSelectFoundationMap} from './types';
 
+/** MDC Select Foundation */
 export class MDCSelectFoundation extends MDCFoundation<MDCSelectAdapter> {
   static override get cssClasses() {
     return cssClasses;
@@ -45,7 +46,8 @@ export class MDCSelectFoundation extends MDCFoundation<MDCSelectAdapter> {
   }
 
   /**
-   * See {@link MDCSelectAdapter} for typing information on parameters and return types.
+   * See {@link MDCSelectAdapter} for typing information on parameters and
+   * return types.
    */
   static override get defaultAdapter(): MDCSelectAdapter {
     // tslint:disable:object-literal-sort-keys Methods should be in the same order as the adapter interface.
@@ -91,6 +93,8 @@ export class MDCSelectFoundation extends MDCFoundation<MDCSelectAdapter> {
 
   private readonly leadingIcon: MDCSelectIconFoundation|undefined;
   private readonly helperText: MDCSelectHelperTextFoundation|undefined;
+  // Client provided `aria-describedby` ids. Does not include helpTextId.
+  private readonly ariaDescribedbyIds: string[];
 
   // Disabled state
   private disabled = false;
@@ -112,11 +116,18 @@ export class MDCSelectFoundation extends MDCFoundation<MDCSelectAdapter> {
    * @param adapter
    * @param foundationMap Map from subcomponent names to their subfoundations.
    */
-  constructor(adapter?: Partial<MDCSelectAdapter>, foundationMap: Partial<MDCSelectFoundationMap> = {}) {
+  constructor(
+      adapter?: Partial<MDCSelectAdapter>,
+      foundationMap: Partial<MDCSelectFoundationMap> = {}) {
     super({...MDCSelectFoundation.defaultAdapter, ...adapter});
 
     this.leadingIcon = foundationMap.leadingIcon;
     this.helperText = foundationMap.helperText;
+    this.ariaDescribedbyIds =
+        this.adapter.getSelectAnchorAttr(strings.ARIA_DESCRIBEDBY)
+            ?.split(' ')
+            ?.filter(id => id !== this.helperText?.getId() && id !== '') ||
+        [];
   }
 
   /** Returns the index of the currently selected menu item, or -1 if none. */
@@ -237,7 +248,8 @@ export class MDCSelectFoundation extends MDCFoundation<MDCSelectAdapter> {
       return;
     }
 
-    // Menu should open to the last selected element, should open to first menu item otherwise.
+    // Menu should open to the last selected element, should open to first menu
+    // item otherwise.
     const selectedIndex = this.getSelectedIndex();
     const focusItemIndex = selectedIndex >= 0 ? selectedIndex : 0;
     this.adapter.focusMenuItemAtIndex(focusItemIndex);
@@ -412,8 +424,10 @@ export class MDCSelectFoundation extends MDCFoundation<MDCSelectAdapter> {
     if (this.useDefaultValidation &&
         this.adapter.hasClass(cssClasses.REQUIRED) &&
         !this.adapter.hasClass(cssClasses.DISABLED)) {
-      // See notes for required attribute under https://www.w3.org/TR/html52/sec-forms.html#the-select-element
-      // TL;DR: Invalid if no index is selected, or if the first index is selected and has an empty value.
+      // See notes for required attribute under
+      // https://www.w3.org/TR/html52/sec-forms.html#the-select-element TL;DR:
+      // Invalid if no index is selected, or if the first index is selected and
+      // has an empty value.
       return this.getSelectedIndex() !== numbers.UNSET_INDEX &&
           (this.getSelectedIndex() !== 0 || Boolean(this.getValue()));
     }
@@ -473,11 +487,19 @@ export class MDCSelectFoundation extends MDCFoundation<MDCSelectAdapter> {
     const helperTextId = this.helperText.getId();
 
     if (helperTextVisible && helperTextId) {
-      this.adapter.setSelectAnchorAttr(strings.ARIA_DESCRIBEDBY, helperTextId);
+      this.adapter.setSelectAnchorAttr(
+          strings.ARIA_DESCRIBEDBY,
+          [...this.ariaDescribedbyIds, helperTextId].join(' '));
     } else {
-      // Needed because screenreaders will read labels pointed to by
-      // `aria-describedby` even if they are `aria-hidden`.
-      this.adapter.removeSelectAnchorAttr(strings.ARIA_DESCRIBEDBY);
+      // Remove helptext from list of describedby ids. Needed because
+      // screenreaders will read labels pointed to by `aria-describedby` even if
+      // they are `aria-hidden`.
+      if (this.ariaDescribedbyIds.length > 0) {
+        this.adapter.setSelectAnchorAttr(
+            strings.ARIA_DESCRIBEDBY, this.ariaDescribedbyIds.join(' '));
+      } else {  // helper text is the only describedby element
+        this.adapter.removeSelectAnchorAttr(strings.ARIA_DESCRIBEDBY);
+      }
     }
   }
 
